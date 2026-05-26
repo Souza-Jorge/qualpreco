@@ -27,13 +27,11 @@ export function ProdutoCard({ produto }: { produto: Produto }) {
   const precoPromo = toNumber(produto.promo_price);
   const precoCusto = toNumber(produto.cost_price);
 
-  const hoje = Date.now();
-  const promoIniciada =
-    !produto.promo_start || new Date(produto.promo_start).getTime() <= hoje + 86400000;
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
   const promoAtiva =
     precoPromo != null &&
-    promoIniciada &&
-    (!produto.promo_end || new Date(produto.promo_end).getTime() >= hoje - 86400000);
+    (!produto.promo_end || new Date(produto.promo_end).getTime() >= hoje.getTime());
 
   const precoFinal = promoAtiva ? precoPromo : precoVenda;
 
