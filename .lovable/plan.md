@@ -1,51 +1,42 @@
-## Visão geral
+## Plano atualizado (Supabase manual, sem Lovable Cloud)
 
-App responsivo, público (sem login), para consultar a tabela `produto` no Supabase (3500 registros). Busca por código (`key`), nome ou leitura de código de barras (câmera no celular ou leitor USB no desktop).
+Como você forneceu URL e anon key de um Supabase próprio, vou configurar manualmente — sem ativar Lovable Cloud nem usar server functions/admin client. A consulta será feita direto do browser com a anon key (pública, segura no frontend).
 
-## Stack
+## Configuração
 
-- TanStack Start (já configurado) + Tailwind + shadcn/ui
-- Lovable Cloud (Supabase) — apenas leitura pública da tabela `produto`
-- `@zxing/browser` para leitura de código de barras via câmera
+- Criar `src/integrations/supabase/client.ts` com `createClient` apontando para:
+  - URL: `https://ztnyvrmiwmrqhquavfhl.supabase.co`
+  - anon key fornecida (pública, fica no código)
+- Instalar `@supabase/supabase-js` e `@zxing/browser`.
 
-## Passos
+## Premissas sobre a tabela `produto`
 
-1. **Ativar Lovable Cloud** e confirmar a tabela `produto` existente com os campos:
-   `codigo` (key), `nome`, `emb`, `pack`, `estoque`, `preco_custo`, `preco_venda`, `preco_promocional`, `data_fim_promocao`, `data_validade`.
-   - Garantir RLS com policy de `SELECT` público (`USING (true)`) e GRANT `SELECT` para `anon` e `authenticated`.
-   - Criar índices: `btree` em `codigo` e `GIN` (`pg_trgm`) em `nome` para busca rápida por nome em 3500 produtos.
+Você confirma que a tabela já existe com os campos: `codigo` (PK / key), `nome`, `emb`, `pack`, `estoque`, `preco_custo`, `preco_venda`, `preco_promocional`, `data_fim_promocao`, `data_validade`. **Pré-requisitos no seu Supabase** (fora do que eu controlo):
+- RLS habilitada com policy `SELECT` para `anon` (`USING (true)`)
+- `GRANT SELECT ON public.produto TO anon`
+- Recomendado: índices `btree` em `codigo` e `GIN` (pg_trgm) em `nome` para 3500 produtos
 
-2. **Rota única `/` (`src/routes/index.tsx`)** com a UI de consulta:
-   - Campo de busca unificado com auto-detecção:
-     - Numérico puro → busca exata por `codigo`
-     - Texto → busca `ilike` por `nome` (debounce 300ms, limite 20 resultados)
-   - Botão "Escanear" que abre o leitor de câmera (`@zxing/browser`) em um Dialog — preenche o campo automaticamente ao detectar.
-   - Suporte a leitor USB: o input fica em foco; leitores USB digitam o código + Enter, disparando a busca automaticamente.
+Se algum desses faltar, a busca retorna vazio/erro — me avise que te passo o SQL.
 
-3. **Card de resultado** mostrando todos os campos, com destaque visual:
-   - Preço de venda em destaque grande
-   - Se houver `preco_promocional` válido (dentro de `data_fim_promocao`): badge "PROMOÇÃO" vermelha, preço promocional verde, preço normal riscado
-   - `estoque` com badge colorida (verde > 0, vermelho = 0)
-   - Alerta amarelo se `data_validade` próxima (< 30 dias) ou vermelho se vencida
+## UI (rota única `/`)
 
-4. **Design system** (em `src/styles.css`) usando as 4 cores como tokens semânticos:
-   - Amarelo → `--warning` (validade próxima, alertas)
-   - Vermelho → `--destructive` (promoção, sem estoque, vencido)
-   - Verde → `--success` (em estoque, preço promocional)
-   - Azul → `--primary` (CTAs, foco, header)
-   - Layout mobile-first, input grande e touch-friendly, botão de scanner proeminente.
+- Input de busca grande, sempre focado (compatível com leitor USB → digita + Enter)
+- Auto-detecção: numérico puro → busca exata por `codigo` (`eq`); texto → `ilike` em `nome` (debounce 300ms, limite 20)
+- Botão "Escanear" → Dialog com câmera (`@zxing/browser`, suporta EAN-13/8, UPC, Code128) → preenche o input e busca
+- Card de resultado:
+  - Preço de venda em destaque grande (azul)
+  - Promoção ativa (tem `preco_promocional` e `data_fim_promocao >= hoje`): badge vermelha "PROMOÇÃO", preço promocional verde, venda riscado
+  - Estoque: badge verde (>0) ou vermelha (=0)
+  - Validade: alerta amarelo (<30 dias) ou vermelho (vencido)
+  - Demais campos (`emb`, `pack`, `preco_custo`) em layout secundário
+- Histórico das 10 últimas consultas em localStorage
 
-5. **Histórico local** das últimas 10 consultas (localStorage) para acesso rápido.
+## Design
 
-## Detalhes técnicos
-
-- Consultas via `createServerFn` usando `supabaseAdmin` (leitura pública, sem auth) com projeção explícita das colunas seguras.
-- Scanner: `@zxing/browser` com `BrowserMultiFormatReader` (suporta EAN-13, EAN-8, UPC, Code128). Pedir permissão de câmera; tratar erro graciosamente.
-- Detecção de leitor USB: input sempre focado quando não há modal aberto; aceita Enter para submeter.
-- Sem login, sem cadastro, sem edição — somente consulta.
+Tokens em `src/styles.css` (oklch):
+- `--primary` azul · `--success` verde · `--warning` amarelo · `--destructive` vermelho
+- Mobile-first, input/botão touch-friendly, alto contraste
 
 ## Fora do escopo
 
-- Cadastro/edição de produtos
-- Carrinho ou checkout
-- Autenticação
+Login, cadastro/edição de produto, carrinho.
