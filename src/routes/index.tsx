@@ -299,8 +299,14 @@ function Index() {
                 </button>
               );
             })}
+            {results.length >= 100 && (
+              <div className="px-3 py-2 text-center text-[11px] text-muted-foreground">
+                Mostrando os primeiros 100 — refine a busca para ver mais.
+              </div>
+            )}
           </Card>
         )}
+
 
         {!query && !loading && history.length > 0 && (
           <div className="space-y-2">
