@@ -50,6 +50,63 @@ function Index() {
     if (!scanOpen && !selected) inputRef.current?.focus();
   }, [scanOpen, selected]);
 
+  // Captura global de leitor de código de barras de mão (USB/Bluetooth).
+  // Leitores enviam caracteres muito rápido seguidos de Enter, mesmo sem foco no input.
+  const scanBufRef = useRef<string>("");
+  const scanLastTsRef = useRef<number>(0);
+  useEffect(() => {
+    const MAX_INTERKEY_MS = 35;
+    const MIN_LENGTH = 4;
+
+    const onKey = (e: KeyboardEvent) => {
+      // Ignora se houver dialog aberto (scanner da câmera, etc.)
+      if (document.querySelector('[role="dialog"][data-state="open"]')) return;
+
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName;
+      const isEditable =
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        tag === "SELECT" ||
+        (target as HTMLElement | null)?.isContentEditable;
+
+      // Se já está digitando no input de busca, deixa o form cuidar
+      if (isEditable && target !== inputRef.current) return;
+
+      const now = performance.now();
+      const delta = now - scanLastTsRef.current;
+      scanLastTsRef.current = now;
+
+      if (e.key === "Enter") {
+        const code = scanBufRef.current;
+        scanBufRef.current = "";
+        if (code.length >= MIN_LENGTH) {
+          e.preventDefault();
+          setQuery(code);
+          runSearch(code);
+          inputRef.current?.focus();
+        }
+        return;
+      }
+
+      // Apenas caracteres imprimíveis de 1 char
+      if (e.key.length !== 1) {
+        scanBufRef.current = "";
+        return;
+      }
+
+      // Reseta buffer se a tecla anterior foi humana (lenta)
+      if (delta > MAX_INTERKEY_MS) {
+        scanBufRef.current = "";
+      }
+      scanBufRef.current += e.key;
+    };
+
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const pushHistory = (p: Produto) => {
     setHistory((prev) => {
       const next: HistItem[] = [
