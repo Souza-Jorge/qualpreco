@@ -65,6 +65,9 @@ function Index() {
 
   const isNumeric = (s: string) => /^\d+$/.test(s.trim());
 
+  const NAME_LIMIT = 100;
+  const NUM_LIMIT = 50;
+
   const runSearch = async (raw: string) => {
     const q = raw.trim();
     setError(null);
@@ -81,7 +84,7 @@ function Index() {
           .from("products")
           .select(COLUMNS)
           .or(`codigo.eq.${q},barcode.eq.${q}`)
-          .limit(5);
+          .limit(NUM_LIMIT);
         if (error) throw error;
         const list = (data ?? []) as unknown as Produto[];
         if (list.length === 1) {
@@ -102,7 +105,8 @@ function Index() {
           .select(COLUMNS)
           .ilike("name", `%${q}%`)
           .order("name")
-          .limit(20);
+          .limit(NAME_LIMIT);
+
         if (error) throw error;
         const list = (data ?? []) as unknown as Produto[];
         setResults(list);
