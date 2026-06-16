@@ -65,6 +65,9 @@ function Index() {
 
   const isNumeric = (s: string) => /^\d+$/.test(s.trim());
 
+  const NAME_LIMIT = 100;
+  const NUM_LIMIT = 50;
+
   const runSearch = async (raw: string) => {
     const q = raw.trim();
     setError(null);
@@ -81,7 +84,7 @@ function Index() {
           .from("products")
           .select(COLUMNS)
           .or(`codigo.eq.${q},barcode.eq.${q}`)
-          .limit(5);
+          .limit(NUM_LIMIT);
         if (error) throw error;
         const list = (data ?? []) as unknown as Produto[];
         if (list.length === 1) {
@@ -102,7 +105,8 @@ function Index() {
           .select(COLUMNS)
           .ilike("name", `%${q}%`)
           .order("name")
-          .limit(20);
+          .limit(NAME_LIMIT);
+
         if (error) throw error;
         const list = (data ?? []) as unknown as Produto[];
         setResults(list);
@@ -220,7 +224,8 @@ function Index() {
         {selected && !loading && <ProdutoCard produto={selected} />}
 
         {showResultsList && !loading && (
-          <Card className="divide-y overflow-hidden">
+          <Card className="max-h-[70vh] divide-y overflow-y-auto">
+
             {results.map((p) => {
               const preco = toNumber(p.sale_price);
               const promo = toNumber(p.promo_price);
@@ -294,8 +299,14 @@ function Index() {
                 </button>
               );
             })}
+            {results.length >= 100 && (
+              <div className="px-3 py-2 text-center text-[11px] text-muted-foreground">
+                Mostrando os primeiros 100 — refine a busca para ver mais.
+              </div>
+            )}
           </Card>
         )}
+
 
         {!query && !loading && history.length > 0 && (
           <div className="space-y-2">
