@@ -224,7 +224,8 @@ function Index() {
         {selected && !loading && <ProdutoCard produto={selected} />}
 
         {showResultsList && !loading && (
-          <Card className="divide-y overflow-hidden">
+          <Card className="max-h-[70vh] divide-y overflow-y-auto">
+
             {results.map((p) => {
               const preco = toNumber(p.sale_price);
               const promo = toNumber(p.promo_price);
