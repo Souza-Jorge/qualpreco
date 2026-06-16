@@ -223,6 +223,19 @@ function Index() {
           <Card className="divide-y overflow-hidden">
             {results.map((p) => {
               const preco = toNumber(p.sale_price);
+              const promo = toNumber(p.promo_price);
+              const hoje = new Date();
+              hoje.setHours(0, 0, 0, 0);
+              const promoAtiva =
+                promo != null &&
+                (!p.promo_end || new Date(p.promo_end).getTime() >= hoje.getTime());
+              const precoFinal = promoAtiva ? promo : preco;
+              const estoque = p.stock_quantity ?? 0;
+              const semEstoque = estoque <= 0;
+              const fmt = (v: number | null) =>
+                v != null
+                  ? v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+                  : "—";
               return (
                 <button
                   key={p.codigo}
@@ -230,21 +243,53 @@ function Index() {
                     setSelected(p);
                     pushHistory(p);
                   }}
-                  className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-accent"
+                  className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-2 text-left transition-colors hover:bg-accent"
                 >
                   <div className="min-w-0">
-                    <div className="truncate font-medium">{p.name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      Cód. {p.codigo}
+                    <div className="flex items-center gap-2">
+                      <span className="truncate text-sm font-medium">{p.name}</span>
+                      {promoAtiva && (
+                        <span className="shrink-0 rounded bg-destructive px-1.5 py-0.5 text-[10px] font-bold leading-none text-destructive-foreground">
+                          PROMO
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
+                      <span className="shrink-0">#{p.codigo}</span>
+                      {p.unit && <span className="shrink-0">· {p.unit}</span>}
+                      {p.pack != null && <span className="shrink-0">· x{p.pack}</span>}
+                      {p.barcode && (
+                        <span className="hidden truncate sm:inline">
+                          · {p.barcode}
+                        </span>
+                      )}
+                      {p.category_name && (
+                        <span className="hidden truncate md:inline">
+                          · {p.category_name}
+                        </span>
+                      )}
+                      <span
+                        className={`ml-auto shrink-0 font-medium ${
+                          semEstoque ? "text-destructive" : "text-success"
+                        }`}
+                      >
+                        {semEstoque ? "Sem estoque" : `Est. ${estoque}`}
+                      </span>
                     </div>
                   </div>
-                  <div className="shrink-0 font-semibold text-primary">
-                    {preco != null
-                      ? preco.toLocaleString("pt-BR", {
-                          style: "currency",
-                          currency: "BRL",
-                        })
-                      : "—"}
+                  <div className="flex shrink-0 flex-col items-end leading-tight">
+                    <span
+                      className={`text-base font-bold ${
+                        promoAtiva ? "text-success" : "text-primary"
+                      }`}
+                    >
+                      {fmt(precoFinal)}
+                    </span>
+                    {promoAtiva && preco != null && (
+                      <span className="text-[11px] text-muted-foreground line-through">
+                        {fmt(preco)}
+                      </span>
+                    )}
                   </div>
                 </button>
               );
