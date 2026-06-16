@@ -1,18 +1,31 @@
-## Ajuste na lógica de promoção ativa
+### Objetivo
+Melhorar a visualização da lista de resultados de busca (quando há múltiplos produtos), adicionando mais informações sem aumentar a altura do item, mantendo **uma linha por produto**.
 
-**Arquivo:** `src/components/ProdutoCard.tsx`
+### O que será ajustado
+Arquivo `src/routes/index.tsx`, seção da lista de resultados (`showResultsList`).
 
-Trocar a regra atual (`promoIniciada` via `promo_start` + tolerância de 1 dia em `promo_end`) por uma regra simples baseada apenas em `promo_end`:
+### Mudanças detalhadas
+1. **Layout horizontal compacto por item**
+   - Estrutura em grid de 3 áreas: `(info) | (metadados) | (preço/ações)`
+   - Altura fixa por item (~56-64px), sem quebra de linha
+2. **Novas informações adicionadas**
+   - **Barcode**: exibido como tag pequena (ex: `78912345`) quando disponível
+   - **Unidade (`unit`)**: exibida ao lado do código
+   - **Categoria (`category_name`)**: tag discreta
+   - **Estoque (`stock_quantity`)**: indicador visual pequeno (verde/vermelho) — apenas cor + número
+   - **Promoção ativa**: badge vermelho "PROMO" se `promo_price` estiver válido e `promo_end >= hoje`
+3. **Preço enriquecido**
+   - Se promoção ativa: preço original riscado + preço promo em destaque (cor de destaque)
+   - Se sem promo: apenas `sale_price`
+4. **Responsividade**
+   - Usar `min-w-0` + `truncate` para que textos longos não quebrem linha
+   - Em telas estreitas (mobile), ocultar `barcode` e `category_name` para não comprimir demais
+   - Ícones do Lucide em `h-3 w-3` para economizar espaço
 
-```ts
-const hoje = new Date(); hoje.setHours(0,0,0,0);
-const promoAtiva =
-  precoPromo != null &&
-  (!produto.promo_end || new Date(produto.promo_end).getTime() >= hoje.getTime());
-```
+### O que NÃO será alterado
+- O card detalhado (`ProdutoCard.tsx`) permanece igual
+- O histórico de consultas permanece igual
+- A lógica de busca e estado não muda
 
-- Remove a checagem de `promo_start`.
-- Considera promoção ativa quando `promo_price` existe **e** `promo_end >= data de hoje` (ou `promo_end` é nulo).
-- Comparação feita a partir do início do dia atual, para que o último dia da promo conte como ativo.
-
-Nada mais muda: o badge "PROMOÇÃO até DD/MM", o preço em verde e o preço original riscado continuam funcionando como hoje.
+### Resultado esperado
+Cada linha da lista exibe nome, código, barcode, unidade, categoria, estoque e preço (com destaque para promoção) de forma compacta, legível e sem quebra de linha.
