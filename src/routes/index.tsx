@@ -137,10 +137,16 @@ function Index() {
     try {
       if (isNumeric(q)) {
         // Numérico: tenta código exato OU código de barras exato
+        const INT4_MAX = 2147483647;
+        const asInt = Number(q);
+        const fitsInt = Number.isSafeInteger(asInt) && asInt <= INT4_MAX;
+        const filter = fitsInt
+          ? `codigo.eq.${q},barcode.eq.${q}`
+          : `barcode.eq.${q}`;
         const { data, error } = await supabase
           .from("products")
           .select(COLUMNS)
-          .or(`codigo.eq.${q},barcode.eq.${q}`)
+          .or(filter)
           .limit(NUM_LIMIT);
         if (error) throw error;
         const list = (data ?? []) as unknown as Produto[];
