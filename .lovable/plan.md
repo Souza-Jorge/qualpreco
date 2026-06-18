@@ -1,35 +1,31 @@
 ## Problema
 
-Leitor de mão (USB/Bluetooth) funciona como um teclado: digita os dígitos muito rápido e envia `Enter` no final. Hoje isso só funciona se o campo de busca estiver focado. Quando o usuário está vendo um produto selecionado, no histórico, ou clicou em outro lugar, o foco se perde e o "tiro" do leitor não dispara nada.
+Ao escanear `7898650400171`, a query usa `.or('codigo.eq.7898650400171,barcode.eq.7898650400171')`. Como `codigo` é `integer` no Postgres e o valor ultrapassa o limite (2.147.483.647), o banco rejeita a comparação inteira **antes** de avaliar a parte do `barcode`, retornando o erro `out of range for type integer`.
 
-## Solução
+## Correção
 
-Adicionar um **listener global de teclado** em `src/routes/index.tsx` que detecta o padrão típico de um leitor de mão e dispara a busca, independente do foco.
+Em `src/routes/index.tsx`, dentro de `runSearch`, ajustar o ramo numérico para só incluir `codigo.eq.<q>` quando o valor couber em `int4`. Caso contrário, consultar apenas por `barcode`.
 
-### Como detectar leitor vs digitação humana
+```ts
+const INT4_MAX = 2147483647;
+const asInt = Number(q);
+const fitsInt = Number.isSafeInteger(asInt) && asInt <= INT4_MAX;
 
-- Buffer acumula teclas; cada tecla zera um timer.
-- Se chegarem **vários caracteres em < ~30 ms entre teclas** e terminar com `Enter`, é leitor.
-- Aceita apenas caracteres imprimíveis (dígitos/letras/`-`).
-- Ignora se o foco já estiver em `<input>`, `<textarea>` ou campo editável (deixa o fluxo normal do form cuidar).
-- Ignora se um `Dialog` estiver aberto (scanner de câmera, etc.).
+const filter = fitsInt
+  ? `codigo.eq.${q},barcode.eq.${q}`
+  : `barcode.eq.${q}`;
 
-### Comportamento ao detectar
+const { data, error } = await supabase
+  .from("products")
+  .select(COLUMNS)
+  .or(filter)
+  .limit(NUM_LIMIT);
+```
 
-1. Limpa o buffer.
-2. Seta `query` com o código lido.
-3. Chama `runSearch(code)` imediatamente (sem esperar o debounce).
-4. Foca o input para feedback visual.
+Resto da lógica (seleção única, histórico, mensagens de erro) permanece igual.
 
-### Detalhes técnicos
+## Arquivo alterado
 
-- `useEffect` em `Index()` registra `window.addEventListener("keydown", …)` e remove no cleanup.
-- Estado via `useRef` (buffer, timestamp da última tecla) para não causar re-renders.
-- Limiares: `MAX_INTERKEY_MS = 30`, `MIN_LENGTH = 4` (evita falso positivo de duas teclas rápidas humanas).
-- Não mexe em `BarcodeScanner.tsx` (câmera continua igual) nem no form atual (digitação manual + Enter continua funcionando).
+- `src/routes/index.tsx` — apenas o trecho do ramo `isNumeric(q)` em `runSearch`.
 
-### Arquivos alterados
-
-- `src/routes/index.tsx` — apenas adicionar o `useEffect` global e os refs.
-
-Nenhuma mudança em backend, schema ou outros componentes.
+Nenhuma alteração em schema, scanner ou outros componentes.
