@@ -85,6 +85,41 @@ export function ProdutoCard({ produto }: { produto: Produto }) {
               </span>
             )}
           </div>
+
+          {(produto.unit || produto.pack != null || precoCusto != null) && (
+            <dl className="mt-4 flex flex-wrap gap-x-8 gap-y-3 border-t border-border/40 pt-3">
+              {produto.unit && (
+                <div>
+                  <dt className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                    Emb.
+                  </dt>
+                  <dd className="text-lg font-semibold text-foreground">
+                    {produto.unit}
+                  </dd>
+                </div>
+              )}
+              {produto.pack != null && (
+                <div>
+                  <dt className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                    Pack
+                  </dt>
+                  <dd className="text-lg font-semibold text-foreground">
+                    {produto.pack}
+                  </dd>
+                </div>
+              )}
+              {precoCusto != null && (
+                <div>
+                  <dt className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                    Custo
+                  </dt>
+                  <dd className="text-lg font-semibold text-foreground">
+                    {brl(precoCusto)}
+                  </dd>
+                </div>
+              )}
+            </dl>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -118,28 +153,8 @@ export function ProdutoCard({ produto }: { produto: Produto }) {
             </Badge>
           )}
         </div>
-
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-2 border-t pt-4 text-sm sm:grid-cols-3">
-          {produto.unit && (
-            <div>
-              <dt className="text-xs uppercase text-muted-foreground">Emb.</dt>
-              <dd className="font-medium">{produto.unit}</dd>
-            </div>
-          )}
-          {produto.pack != null && (
-            <div>
-              <dt className="text-xs uppercase text-muted-foreground">Pack</dt>
-              <dd className="font-medium">{produto.pack}</dd>
-            </div>
-          )}
-          {precoCusto != null && (
-            <div>
-              <dt className="text-xs uppercase text-muted-foreground">Custo</dt>
-              <dd className="font-medium">{brl(precoCusto)}</dd>
-            </div>
-          )}
-        </dl>
       </div>
+
     </Card>
   );
 }
