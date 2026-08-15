@@ -66,10 +66,26 @@ function mensagemDeErro(e: unknown): string {
 
 type Status = "starting" | "running" | "error";
 
+const RE_TRASEIRA = /(back|rear|traseir|environment|world)/i;
+const RE_FRONTAL = /(front|frontal|user|face)/i;
+
+function acharTraseira(list: MediaDeviceInfo[]): MediaDeviceInfo | null {
+  const back = list.find((d) => RE_TRASEIRA.test(d.label));
+  if (back) return back;
+  // Sem labels úteis: em celulares a última costuma ser a traseira
+  const naoFrontais = list.filter((d) => !RE_FRONTAL.test(d.label));
+  if (list.length > 1 && naoFrontais.length) {
+    return naoFrontais[naoFrontais.length - 1] ?? null;
+  }
+  return null;
+}
+
 export function BarcodeScanner({ open, onClose, onDetected }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const controlsRef = useRef<{ stop: () => void } | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const startingRef = useRef(false);
+  const autoSelecionadaRef = useRef(false);
   const [status, setStatus] = useState<Status>("starting");
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
@@ -85,7 +101,17 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
     if (video) video.srcObject = null;
+    startingRef.current = false;
   }, []);
+
+  // Ao fechar, zera a seleção manual para reabrir sempre na traseira
+  useEffect(() => {
+    if (!open) {
+      setDeviceId(null);
+      setDevices([]);
+      autoSelecionadaRef.current = false;
+    }
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -100,11 +126,15 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
       return;
     }
 
+    // Garante que nenhum stream anterior siga ativo (open alternando rápido)
+    stopCamera();
+    startingRef.current = true;
+
     const reader = new BrowserMultiFormatReader(HINTS as never);
 
     // Preferência: câmera escolhida > traseira exata > traseira ideal > qualquer uma
     const tentativas: MediaTrackConstraints[] = deviceId
-      ? [{ deviceId: { exact: deviceId } }]
+      ? [{ deviceId: { exact: deviceId } }, { facingMode: { ideal: "environment" } }, {}]
       : [
           { facingMode: { exact: "environment" } },
           { facingMode: { ideal: "environment" } },
@@ -157,15 +187,33 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
             return;
           }
           controlsRef.current = controls;
-          streamRef.current =
+          const stream =
             (videoRef.current?.srcObject as MediaStream | null) ?? null;
+          streamRef.current = stream;
 
           await esperarVideoPronto();
           if (!cancelled) setStatus("running");
 
           try {
             const list = await BrowserCodeReader.listVideoInputDevices();
-            if (!cancelled) setDevices(list);
+            if (cancelled) return;
+            setDevices(list);
+
+            // Se caímos numa câmera frontal, troca automaticamente pela traseira
+            if (!deviceId && !autoSelecionadaRef.current && list.length > 1) {
+              const track = stream?.getVideoTracks()[0];
+              const settings = track?.getSettings?.() ?? {};
+              const jaTraseira =
+                settings.facingMode === "environment" ||
+                RE_TRASEIRA.test(track?.label ?? "");
+              if (!jaTraseira) {
+                const traseira = acharTraseira(list);
+                if (traseira && traseira.deviceId !== settings.deviceId) {
+                  autoSelecionadaRef.current = true;
+                  setDeviceId(traseira.deviceId);
+                }
+              }
+            }
           } catch {
             /* lista de câmeras é opcional */
           }
@@ -178,12 +226,16 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
       throw ultimoErro;
     };
 
-    start().catch((e) => {
-      if (cancelled) return;
-      console.error("Erro ao iniciar câmera:", e);
-      setErrorMsg(mensagemDeErro(e));
-      setStatus("error");
-    });
+    start()
+      .catch((e) => {
+        if (cancelled) return;
+        console.error("Erro ao iniciar câmera:", e);
+        setErrorMsg(mensagemDeErro(e));
+        setStatus("error");
+      })
+      .finally(() => {
+        startingRef.current = false;
+      });
 
     return () => {
       cancelled = true;
@@ -191,6 +243,7 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, deviceId, attempt]);
+
 
   const trocarCamera = () => {
     if (devices.length < 2) return;
