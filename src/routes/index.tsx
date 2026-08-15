@@ -153,6 +153,7 @@ function Index() {
           .or(filter)
           .limit(NUM_LIMIT);
         if (error) throw error;
+        if (stale()) return;
         const list = (data ?? []) as unknown as Produto[];
         if (list.length === 1) {
           setSelected(list[0]);
