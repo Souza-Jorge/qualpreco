@@ -206,16 +206,8 @@ function Index() {
           setError(`Nenhum produto encontrado com o código "${q}".`);
         }
       } else {
-        const { data, error } = await supabase
-          .from("products")
-          .select(COLUMNS)
-          .ilike("name", `%${q}%`)
-          .order("name")
-          .limit(NAME_LIMIT);
-
-        if (error) throw error;
+        const list = await buscarPorNome(q);
         if (stale()) return;
-        const list = (data ?? []) as unknown as Produto[];
         setResults(list);
         setSelected(list.length === 1 ? list[0] : null);
         if (list.length === 1) pushHistory(list[0]);
