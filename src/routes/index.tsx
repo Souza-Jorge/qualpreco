@@ -356,15 +356,15 @@ function Index() {
 
         {showResultsList && !loading && (
           <Card className="max-h-[70vh] divide-y overflow-y-auto">
-
+            <div className="sticky top-0 z-10 bg-card px-3 py-2 text-xs font-medium text-muted-foreground">
+              {results.length} produtos encontrados
+            </div>
             {results.map((p) => {
               const preco = toNumber(p.sale_price);
               const promo = toNumber(p.promo_price);
-              const hoje = new Date();
-              hoje.setHours(0, 0, 0, 0);
+              const todayStr = new Date().toLocaleDateString("en-CA");
               const promoAtiva =
-                promo != null &&
-                (!p.promo_end || new Date(p.promo_end).getTime() >= hoje.getTime());
+                promo != null && (!p.promo_end || p.promo_end >= todayStr);
               const precoFinal = promoAtiva ? promo : preco;
               const estoque = p.stock_quantity ?? 0;
               const semEstoque = estoque <= 0;
