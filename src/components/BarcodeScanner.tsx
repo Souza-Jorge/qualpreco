@@ -13,7 +13,9 @@ interface Props {
   onDetected: (code: string) => void;
 }
 
-const HINTS = new Map<DecodeHintType, unknown>([
+const { BarcodeFormat, DecodeHintType } = zxingLibrary;
+
+const HINTS = new Map<number, unknown>([
   [
     DecodeHintType.POSSIBLE_FORMATS,
     [
