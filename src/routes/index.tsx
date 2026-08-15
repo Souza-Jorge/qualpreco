@@ -136,6 +136,22 @@ function Index() {
 
   const reqIdRef = useRef(0);
 
+  // Divide o termo em palavras: todas precisam aparecer no nome (AND)
+  const tokenize = (q: string) => {
+    const parts = q.split(/\s+/).filter(Boolean);
+    const big = parts.filter((p) => p.length > 1);
+    return (big.length > 0 ? big : parts).slice(0, 5);
+  };
+
+  const buscarPorNome = async (q: string) => {
+    let qb = supabase.from("products").select(COLUMNS);
+    for (const t of tokenize(q)) qb = qb.ilike("name", `%${t}%`);
+    const { data, error } = await qb.order("name").limit(NAME_LIMIT);
+    if (error) throw error;
+    return (data ?? []) as unknown as Produto[];
+  };
+
+
   const runSearch = async (raw: string) => {
     const q = raw.trim();
     setError(null);
