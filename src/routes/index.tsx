@@ -256,7 +256,9 @@ function Index() {
         setResults(list);
         setSelected(list.length === 1 ? list[0] : null);
         if (list.length === 1) pushHistory(list[0]);
-        if (list.length === 0) setError(`Nenhum produto encontrado para "${q}".`);
+        if (list.length === 0) setError(onlyPromoRef.current
+          ? `Nenhum produto em oferta encontrado para "${q}".`
+          : `Nenhum produto encontrado para "${q}".`);
       }
     } catch (e: any) {
       if (stale()) return;
