@@ -24,7 +24,12 @@ const brlParts = (v: number | null | undefined) => {
 
 const fmtDate = (d: string | null) => {
   if (!d) return null;
-  const date = new Date(d);
+  // Datas vêm como "YYYY-MM-DD" (date-only). new Date() interpreta isso como
+  // meia-noite UTC, exibindo o dia anterior em fusos com offset negativo (ex.:
+  // 2026-08-15 -> 14/08 em UTC-3). Montamos a data local para exibir o dia correto.
+  const [y, m, day] = d.split("-").map(Number);
+  if (!y || !m || !day) return null;
+  const date = new Date(y, m - 1, day);
   if (isNaN(date.getTime())) return null;
   return date.toLocaleDateString("pt-BR");
 };
