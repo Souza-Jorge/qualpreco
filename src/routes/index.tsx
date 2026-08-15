@@ -321,10 +321,14 @@ function Index() {
 
   const clear = () => {
     setQuery("");
-    setResults([]);
     setSelected(null);
     setError(null);
-    inputRef.current?.focus();
+    if (onlyPromo) {
+      runListarPromocoes();
+    } else {
+      setResults([]);
+      inputRef.current?.focus();
+    }
   };
 
   // Esc no desktop = nova consulta
