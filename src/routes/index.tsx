@@ -184,12 +184,13 @@ function Index() {
         if (list.length === 0) setError(`Nenhum produto encontrado para "${q}".`);
       }
     } catch (e: any) {
+      if (stale()) return;
       console.error(e);
       setError(e?.message ?? "Erro ao consultar produtos.");
       setResults([]);
       setSelected(null);
     } finally {
-      setLoading(false);
+      if (!stale()) setLoading(false);
     }
   };
 
