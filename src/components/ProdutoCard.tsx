@@ -124,6 +124,21 @@ export function ProdutoCard({ produto }: { produto: Produto }) {
                   </dd>
                 </div>
               )}
+              {margemPct != null && (
+                <div>
+                  <dt className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                    Margem
+                  </dt>
+                  <dd
+                    className={`text-lg font-semibold ${
+                      margemPct >= 0 ? "text-success" : "text-destructive"
+                    }`}
+                  >
+                    {margemPct >= 0 ? "+" : ""}
+                    {margemPct.toFixed(0)}%
+                  </dd>
+                </div>
+              )}
             </dl>
           )}
         </div>
