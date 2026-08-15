@@ -217,7 +217,7 @@ function Index() {
 
   useEffect(() => {
     const q = query.trim();
-    if (!q || isNumeric(q)) return;
+    if (q.length < 2) return;
     const t = setTimeout(() => runSearch(q), 350);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
