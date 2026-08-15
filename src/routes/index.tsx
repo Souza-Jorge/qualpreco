@@ -284,7 +284,7 @@ function Index() {
                 aria-label="Escanear código de barras"
               >
                 <ScanLine className="h-6 w-6" />
-                <span className="hidden xs:inline sm:inline">Escanear</span>
+                <span className="hidden min-[380px]:inline">Escanear</span>
               </Button>
             </div>
           </form>
