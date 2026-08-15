@@ -93,11 +93,16 @@ export function ProdutoCard({ produto }: { produto: Produto }) {
           )}
           <div className="flex flex-wrap items-baseline gap-3">
             <span
-              className={`text-4xl font-bold md:text-5xl ${
+              className={`inline-flex items-baseline gap-1.5 font-bold ${
                 promoAtiva ? "text-success" : "text-primary"
               }`}
             >
-              {brl(precoFinal)}
+              <span className="text-2xl md:text-3xl">
+                {brlParts(precoFinal).currency}
+              </span>
+              <span className="text-4xl md:text-5xl">
+                {brlParts(precoFinal).number}
+              </span>
             </span>
             {promoAtiva && precoVenda != null && (
               <span className="text-lg text-muted-foreground line-through">
