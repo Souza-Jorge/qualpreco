@@ -474,7 +474,7 @@ function Index() {
         {showResultsList && !loading && (
           <Card className="max-h-[70vh] divide-y overflow-y-auto">
             <div className="sticky top-0 z-10 bg-card px-3 py-2 text-xs font-medium text-muted-foreground">
-              {results.length} produtos encontrados
+              {results.length} {onlyPromo ? "produtos em oferta" : "produtos encontrados"}
             </div>
             {results.map((p) => {
               const preco = toNumber(p.sale_price);
