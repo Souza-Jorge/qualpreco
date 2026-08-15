@@ -124,7 +124,7 @@ function Index() {
       const next: HistItem[] = [
         { codigo: p.codigo, name: p.name },
         ...prev.filter((x) => x.codigo !== p.codigo),
-      ].slice(0, 10);
+      ].slice(0, 5);
       try {
         localStorage.setItem(HIST_KEY, JSON.stringify(next));
       } catch {}
