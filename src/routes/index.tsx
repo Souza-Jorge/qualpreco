@@ -163,7 +163,19 @@ function Index() {
           .limit(NUM_LIMIT);
         if (error) throw error;
         if (stale()) return;
-        const list = (data ?? []) as unknown as Produto[];
+        let list = (data ?? []) as unknown as Produto[];
+        if (list.length === 0) {
+          // Sem correspondência exata: busca parcial por nome ou código de barras
+          const { data: partial, error: err2 } = await supabase
+            .from("products")
+            .select(COLUMNS)
+            .or(`name.ilike.%${q}%,barcode.ilike.%${q}%`)
+            .order("name")
+            .limit(NAME_LIMIT);
+          if (err2) throw err2;
+          if (stale()) return;
+          list = (partial ?? []) as unknown as Produto[];
+        }
         if (list.length === 1) {
           setSelected(list[0]);
           setResults([]);
