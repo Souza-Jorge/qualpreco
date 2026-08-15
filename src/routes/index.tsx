@@ -1,6 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ScanLine, Search, X, Loader2, History } from "lucide-react";
+import {
+  ScanLine,
+  Search,
+  X,
+  Loader2,
+  History,
+  SearchX,
+  RotateCcw,
+} from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase, toNumber, type Produto } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -125,6 +134,8 @@ function Index() {
   const NAME_LIMIT = 100;
   const NUM_LIMIT = 50;
 
+  const reqIdRef = useRef(0);
+
   const runSearch = async (raw: string) => {
     const q = raw.trim();
     setError(null);
@@ -133,6 +144,8 @@ function Index() {
       setSelected(null);
       return;
     }
+    const reqId = ++reqIdRef.current;
+    const stale = () => reqId !== reqIdRef.current;
     setLoading(true);
     try {
       if (isNumeric(q)) {
@@ -149,6 +162,7 @@ function Index() {
           .or(filter)
           .limit(NUM_LIMIT);
         if (error) throw error;
+        if (stale()) return;
         const list = (data ?? []) as unknown as Produto[];
         if (list.length === 1) {
           setSelected(list[0]);
@@ -171,6 +185,7 @@ function Index() {
           .limit(NAME_LIMIT);
 
         if (error) throw error;
+        if (stale()) return;
         const list = (data ?? []) as unknown as Produto[];
         setResults(list);
         setSelected(list.length === 1 ? list[0] : null);
@@ -178,12 +193,13 @@ function Index() {
         if (list.length === 0) setError(`Nenhum produto encontrado para "${q}".`);
       }
     } catch (e: any) {
+      if (stale()) return;
       console.error(e);
       setError(e?.message ?? "Erro ao consultar produtos.");
       setResults([]);
       setSelected(null);
     } finally {
-      setLoading(false);
+      if (!stale()) setLoading(false);
     }
   };
 
@@ -208,6 +224,18 @@ function Index() {
     inputRef.current?.focus();
   };
 
+  // Esc no desktop = nova consulta
+  useEffect(() => {
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || scanOpen) return;
+      if (!query && !selected && results.length === 0) return;
+      clear();
+    };
+    window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, selected, results.length, scanOpen]);
+
   const onScan = (code: string) => {
     setQuery(code);
     runSearch(code);
@@ -225,78 +253,118 @@ function Index() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground shadow-md">
-        <div className="mx-auto max-w-3xl px-4 py-4">
-          <h1 className="text-xl font-bold md:text-2xl">Consulta de Preços</h1>
+    <div className="min-h-screen overflow-x-hidden bg-background">
+      <div className="sticky top-0 z-30 border-b border-border/50 bg-primary shadow-md">
+        <header className="mx-auto w-full max-w-3xl px-4 pb-3 pt-4 text-primary-foreground">
+          <h1 className="text-xl font-bold leading-tight md:text-2xl">
+            Consulta de Preços
+          </h1>
           <p className="text-xs opacity-80 md:text-sm">
             Busque por código, nome ou escaneie o código de barras
           </p>
-        </div>
-      </header>
 
-      <main className="mx-auto max-w-3xl space-y-4 px-4 py-4">
-        <form onSubmit={onSubmit}>
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                ref={inputRef}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Código, nome ou código de barras"
-                inputMode="search"
-                autoFocus
-                className="h-14 pl-11 pr-11 text-base"
-              />
-              {query && (
-                <button
-                  type="button"
-                  onClick={clear}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground hover:bg-accent"
-                  aria-label="Limpar"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
+          <form onSubmit={onSubmit} className="mt-3">
+            <div className="flex gap-2">
+              <div className="relative min-w-0 flex-1">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  ref={inputRef}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Código, nome ou código de barras"
+                  inputMode="search"
+                  enterKeyHint="search"
+                  autoFocus
+                  className="h-14 border-0 bg-background pl-11 pr-11 text-base shadow-sm"
+                />
+                {query && (
+                  <button
+                    type="button"
+                    onClick={clear}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-muted-foreground hover:bg-accent"
+                    aria-label="Limpar"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setScanOpen(true)}
+                className="h-14 shrink-0 gap-2 px-4 text-base font-semibold"
+                aria-label="Escanear código de barras"
+              >
+                <ScanLine className="h-6 w-6" />
+                <span className="hidden min-[380px]:inline">Escanear</span>
+              </Button>
             </div>
-            <Button
-              type="button"
-              onClick={() => setScanOpen(true)}
-              className="h-14 w-14 shrink-0 p-0"
-              aria-label="Escanear código de barras"
-            >
-              <ScanLine className="h-6 w-6" />
-            </Button>
-          </div>
-        </form>
+          </form>
+        </header>
+      </div>
 
+      <main className="mx-auto w-full max-w-3xl space-y-4 px-4 py-4">
         {loading && (
-          <div className="flex items-center justify-center gap-2 py-6 text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            Consultando...
-          </div>
-        )}
-
-        {error && !loading && (
-          <Card className="border-destructive bg-destructive/5 p-4 text-sm text-destructive">
-            {error}
+          <Card className="space-y-4 p-4" aria-busy="true">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Consultando...
+            </div>
+            <Skeleton className="h-5 w-2/3" />
+            <Skeleton className="h-14 w-1/2" />
+            <div className="flex gap-2">
+              <Skeleton className="h-6 w-24" />
+              <Skeleton className="h-6 w-20" />
+            </div>
           </Card>
         )}
 
-        {selected && !loading && <ProdutoCard produto={selected} />}
+        {error && !loading && (
+          <Card className="flex flex-col items-center gap-2 p-6 text-center">
+            <SearchX className="h-10 w-10 text-muted-foreground" />
+            <p className="text-sm font-medium text-foreground">{error}</p>
+            <p className="text-xs text-muted-foreground">
+              Confira o código digitado, tente parte do nome do produto ou use o
+              leitor de código de barras.
+            </p>
+            <div className="mt-2 flex flex-wrap justify-center gap-2">
+              <Button variant="outline" size="sm" onClick={clear}>
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Nova consulta
+              </Button>
+              <Button size="sm" onClick={() => setScanOpen(true)}>
+                <ScanLine className="mr-2 h-4 w-4" />
+                Escanear
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {selected && !loading && (
+          <div className="space-y-3">
+            <ProdutoCard produto={selected} />
+            <Button
+              variant="outline"
+              onClick={clear}
+              className="h-12 w-full text-base"
+            >
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Nova consulta
+            </Button>
+          </div>
+        )}
 
         {showResultsList && !loading && (
           <Card className="max-h-[70vh] divide-y overflow-y-auto">
-
+            <div className="sticky top-0 z-10 bg-card px-3 py-2 text-xs font-medium text-muted-foreground">
+              {results.length} produtos encontrados
+            </div>
             {results.map((p) => {
               const preco = toNumber(p.sale_price);
               const promo = toNumber(p.promo_price);
-              const hoje = new Date();
-              hoje.setHours(0, 0, 0, 0);
+              const todayStr = new Date().toLocaleDateString("en-CA");
               const promoAtiva =
-                promo != null &&
-                (!p.promo_end || new Date(p.promo_end).getTime() >= hoje.getTime());
+                promo != null && (!p.promo_end || p.promo_end >= todayStr);
               const precoFinal = promoAtiva ? promo : preco;
               const estoque = p.stock_quantity ?? 0;
               const semEstoque = estoque <= 0;
@@ -311,7 +379,7 @@ function Index() {
                     setSelected(p);
                     pushHistory(p);
                   }}
-                  className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-2 text-left transition-colors hover:bg-accent"
+                  className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-accent active:bg-accent"
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
@@ -370,6 +438,17 @@ function Index() {
           </Card>
         )}
 
+
+        {!query && !loading && history.length === 0 && (
+          <Card className="flex flex-col items-center gap-2 p-8 text-center">
+            <Search className="h-10 w-10 text-muted-foreground" />
+            <p className="text-sm font-medium">Comece uma consulta</p>
+            <p className="max-w-xs text-xs text-muted-foreground">
+              Digite o código, parte do nome do produto ou toque em Escanear para
+              ler o código de barras com a câmera.
+            </p>
+          </Card>
+        )}
 
         {!query && !loading && history.length > 0 && (
           <div className="space-y-2">
