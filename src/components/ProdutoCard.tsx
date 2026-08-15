@@ -41,11 +41,14 @@ export function ProdutoCard({ produto }: { produto: Produto }) {
   const precoPromo = toNumber(produto.promo_price);
   const precoCusto = toNumber(produto.cost_price);
 
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
+  // Data de hoje no fuso local, no formato YYYY-MM-DD. Comparação por string
+  // é fuso-safe e cronológica para esse formato (evita o bug de new Date() que
+  // interpreta "2026-08-15" como meia-noite UTC, marcando como vencida uma promo
+  // que termina hoje em fusos como UTC-3).
+  const todayStr = new Date().toLocaleDateString("en-CA");
   const promoAtiva =
     precoPromo != null &&
-    (!produto.promo_end || new Date(produto.promo_end).getTime() >= hoje.getTime());
+    (!produto.promo_end || produto.promo_end >= todayStr);
 
   const precoFinal = promoAtiva ? precoPromo : precoVenda;
 
