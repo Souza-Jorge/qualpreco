@@ -193,11 +193,18 @@ function Index() {
         const filter = fitsInt
           ? `codigo.eq.${q},barcode.eq.${q}`
           : `barcode.eq.${q}`;
-        const { data, error } = await supabase
+        let numQb = supabase
           .from("products")
           .select(COLUMNS)
           .or(filter)
           .limit(NUM_LIMIT);
+        if (onlyPromo) {
+          const todayStr = new Date().toLocaleDateString("en-CA");
+          numQb = numQb
+            .not("promo_price", "is", null)
+            .or(`promo_end.is.null,promo_end.gte.${todayStr}`);
+        }
+        const { data, error } = await numQb;
         if (error) throw error;
         if (stale()) return;
         let list = (data ?? []) as unknown as Produto[];
