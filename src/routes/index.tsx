@@ -403,6 +403,20 @@ function Index() {
               </Button>
             </div>
           </form>
+
+          <button
+            type="button"
+            onClick={togglePromo}
+            className={`mt-2 flex h-10 w-full items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors ${
+              onlyPromo
+                ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 ring-1 ring-primary-foreground/30"
+            }`}
+            aria-pressed={onlyPromo}
+          >
+            <Percent className="h-4 w-4" />
+            Apenas ofertas
+          </button>
         </header>
       </div>
 
