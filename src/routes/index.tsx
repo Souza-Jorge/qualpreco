@@ -219,7 +219,7 @@ function Index() {
                 .select(COLUMNS)
                 .ilike("barcode", `%${q}%`)
                 .limit(NAME_LIMIT);
-              if (onlyPromo) {
+              if (onlyPromoRef.current) {
                 const todayStr = new Date().toLocaleDateString("en-CA");
                 bqb = bqb
                   .not("promo_price", "is", null)
