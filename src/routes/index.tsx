@@ -176,6 +176,7 @@ function Index() {
           .limit(NAME_LIMIT);
 
         if (error) throw error;
+        if (stale()) return;
         const list = (data ?? []) as unknown as Produto[];
         setResults(list);
         setSelected(list.length === 1 ? list[0] : null);
