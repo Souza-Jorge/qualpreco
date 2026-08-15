@@ -163,7 +163,19 @@ function Index() {
           .limit(NUM_LIMIT);
         if (error) throw error;
         if (stale()) return;
-        const list = (data ?? []) as unknown as Produto[];
+        let list = (data ?? []) as unknown as Produto[];
+        if (list.length === 0) {
+          // Sem correspondência exata: busca parcial por nome ou código de barras
+          const { data: partial, error: err2 } = await supabase
+            .from("products")
+            .select(COLUMNS)
+            .or(`name.ilike.%${q}%,barcode.ilike.%${q}%`)
+            .order("name")
+            .limit(NAME_LIMIT);
+          if (err2) throw err2;
+          if (stale()) return;
+          list = (partial ?? []) as unknown as Produto[];
+        }
         if (list.length === 1) {
           setSelected(list[0]);
           setResults([]);
@@ -205,7 +217,7 @@ function Index() {
 
   useEffect(() => {
     const q = query.trim();
-    if (!q || isNumeric(q)) return;
+    if (q.length < 2) return;
     const t = setTimeout(() => runSearch(q), 350);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -275,7 +287,7 @@ function Index() {
                   inputMode="search"
                   enterKeyHint="search"
                   autoFocus
-                  className="h-14 border-0 bg-background pl-11 pr-11 text-base shadow-sm"
+                  className="h-14 border-0 bg-background pl-11 pr-11 text-base text-foreground shadow-sm placeholder:text-muted-foreground"
                 />
                 {query && (
                   <button
