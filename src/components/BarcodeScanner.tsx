@@ -30,7 +30,7 @@ const HINTS = new Map<number, unknown>([
       BarcodeFormat.ITF,
     ],
   ],
-  [DecodeHintType.TRY_HARDER, true],
+  [3, true],
 ]);
 
 function mensagemDeErro(e: unknown): string {
