@@ -125,6 +125,8 @@ function Index() {
   const NAME_LIMIT = 100;
   const NUM_LIMIT = 50;
 
+  const reqIdRef = useRef(0);
+
   const runSearch = async (raw: string) => {
     const q = raw.trim();
     setError(null);
@@ -133,6 +135,8 @@ function Index() {
       setSelected(null);
       return;
     }
+    const reqId = ++reqIdRef.current;
+    const stale = () => reqId !== reqIdRef.current;
     setLoading(true);
     try {
       if (isNumeric(q)) {
