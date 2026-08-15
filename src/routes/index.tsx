@@ -266,6 +266,46 @@ function Index() {
     }
   };
 
+  const togglePromo = () => {
+    const next = !onlyPromo;
+    setOnlyPromo(next);
+    const q = query.trim();
+    if (next) {
+      // Ativando: se há query, re-busca com filtro; senão lista todas as ofertas
+      if (q.length >= 2) runSearch(q);
+      else runListarPromocoes();
+    } else {
+      // Desativando: se há query, re-busca sem filtro; senão limpa
+      if (q.length >= 2) runSearch(q);
+      else {
+        setResults([]);
+        setSelected(null);
+        setError(null);
+      }
+    }
+  };
+
+  const runListarPromocoes = async () => {
+    const reqId = ++reqIdRef.current;
+    const stale = () => reqId !== reqIdRef.current;
+    setError(null);
+    setSelected(null);
+    setLoading(true);
+    try {
+      const list = await listarPromocoes();
+      if (stale()) return;
+      setResults(list);
+      if (list.length === 0) setError("Nenhum produto em oferta no momento.");
+    } catch (e: any) {
+      if (stale()) return;
+      console.error(e);
+      setError(e?.message ?? "Erro ao listar promoções.");
+      setResults([]);
+    } finally {
+      if (!stale()) setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const q = query.trim();
     if (q.length < 2) return;
