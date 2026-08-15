@@ -246,7 +246,9 @@ function Index() {
         } else {
           setSelected(null);
           setResults([]);
-          setError(`Nenhum produto encontrado com o código "${q}".`);
+          setError(onlyPromoRef.current
+            ? `Nenhum produto em oferta encontrado com o código "${q}".`
+            : `Nenhum produto encontrado com o código "${q}".`);
         }
       } else {
         const list = await buscarPorNome(q);
