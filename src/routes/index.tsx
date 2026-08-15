@@ -145,19 +145,6 @@ function Index() {
     return (big.length > 0 ? big : parts).slice(0, 5);
   };
 
-  // Filtro de ofertas ativas aplicável a qualquer query builder.
-  // Um produto está em oferta quando: promo_price != null E (promo_end nula ou >= hoje).
-  const applyPromoFilter = <T extends ReturnType<typeof supabase.from>["select"] extends never ? never : ReturnType<typeof supabase.from>>(
-    qb: T,
-    active: boolean
-  ) => {
-    if (!active) return qb;
-    const todayStr = new Date().toLocaleDateString("en-CA");
-    return qb
-      .not("promo_price", "is", null)
-      .or(`promo_end.is.null,promo_end.gte.${todayStr}`);
-  };
-
   const buscarPorNome = async (q: string) => {
     let qb = supabase.from("products").select(COLUMNS);
     if (onlyPromo) {
