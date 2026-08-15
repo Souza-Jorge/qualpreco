@@ -325,7 +325,7 @@ function Index() {
     setQuery("");
     setSelected(null);
     setError(null);
-    if (onlyPromo) {
+    if (onlyPromoRef.current) {
       runListarPromocoes();
     } else {
       setResults([]);
