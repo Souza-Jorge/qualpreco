@@ -8,6 +8,7 @@ import {
   History,
   SearchX,
   RotateCcw,
+  Percent,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase, toNumber, type Produto } from "@/integrations/supabase/client";
@@ -46,6 +47,8 @@ function Index() {
   const [error, setError] = useState<string | null>(null);
   const [scanOpen, setScanOpen] = useState(false);
   const [history, setHistory] = useState<HistItem[]>([]);
+  const [onlyPromo, setOnlyPromo] = useState(false);
+  const onlyPromoRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -145,8 +148,27 @@ function Index() {
 
   const buscarPorNome = async (q: string) => {
     let qb = supabase.from("products").select(COLUMNS);
+    if (onlyPromoRef.current) {
+      const todayStr = new Date().toLocaleDateString("en-CA");
+      qb = qb
+        .not("promo_price", "is", null)
+        .or(`promo_end.is.null,promo_end.gte.${todayStr}`);
+    }
     for (const t of tokenize(q)) qb = qb.ilike("name", `%${t}%`);
     const { data, error } = await qb.order("name").limit(NAME_LIMIT);
+    if (error) throw error;
+    return (data ?? []) as unknown as Produto[];
+  };
+
+  const listarPromocoes = async () => {
+    const todayStr = new Date().toLocaleDateString("en-CA");
+    const { data, error } = await supabase
+      .from("products")
+      .select(COLUMNS)
+      .not("promo_price", "is", null)
+      .or(`promo_end.is.null,promo_end.gte.${todayStr}`)
+      .order("name")
+      .limit(NAME_LIMIT);
     if (error) throw error;
     return (data ?? []) as unknown as Produto[];
   };
@@ -172,11 +194,18 @@ function Index() {
         const filter = fitsInt
           ? `codigo.eq.${q},barcode.eq.${q}`
           : `barcode.eq.${q}`;
-        const { data, error } = await supabase
+        let numQb = supabase
           .from("products")
           .select(COLUMNS)
           .or(filter)
           .limit(NUM_LIMIT);
+        if (onlyPromoRef.current) {
+          const todayStr = new Date().toLocaleDateString("en-CA");
+          numQb = numQb
+            .not("promo_price", "is", null)
+            .or(`promo_end.is.null,promo_end.gte.${todayStr}`);
+        }
+        const { data, error } = await numQb;
         if (error) throw error;
         if (stale()) return;
         let list = (data ?? []) as unknown as Produto[];
@@ -184,11 +213,20 @@ function Index() {
           // Sem correspondência exata: busca parcial por nome ou código de barras
           const [porNome, porBarcode] = await Promise.all([
             buscarPorNome(q),
-            supabase
-              .from("products")
-              .select(COLUMNS)
-              .ilike("barcode", `%${q}%`)
-              .limit(NAME_LIMIT),
+            (async () => {
+              let bqb = supabase
+                .from("products")
+                .select(COLUMNS)
+                .ilike("barcode", `%${q}%`)
+                .limit(NAME_LIMIT);
+              if (onlyPromoRef.current) {
+                const todayStr = new Date().toLocaleDateString("en-CA");
+                bqb = bqb
+                  .not("promo_price", "is", null)
+                  .or(`promo_end.is.null,promo_end.gte.${todayStr}`);
+              }
+              return bqb;
+            })(),
           ]);
           if (porBarcode.error) throw porBarcode.error;
           if (stale()) return;
@@ -208,7 +246,9 @@ function Index() {
         } else {
           setSelected(null);
           setResults([]);
-          setError(`Nenhum produto encontrado com o código "${q}".`);
+          setError(onlyPromoRef.current
+            ? `Nenhum produto em oferta encontrado com o código "${q}".`
+            : `Nenhum produto encontrado com o código "${q}".`);
         }
       } else {
         const list = await buscarPorNome(q);
@@ -216,7 +256,9 @@ function Index() {
         setResults(list);
         setSelected(list.length === 1 ? list[0] : null);
         if (list.length === 1) pushHistory(list[0]);
-        if (list.length === 0) setError(`Nenhum produto encontrado para "${q}".`);
+        if (list.length === 0) setError(onlyPromoRef.current
+          ? `Nenhum produto em oferta encontrado para "${q}".`
+          : `Nenhum produto encontrado para "${q}".`);
       }
     } catch (e: any) {
       if (stale()) return;
@@ -224,6 +266,47 @@ function Index() {
       setError(e?.message ?? "Erro ao consultar produtos.");
       setResults([]);
       setSelected(null);
+    } finally {
+      if (!stale()) setLoading(false);
+    }
+  };
+
+  const togglePromo = () => {
+    const next = !onlyPromo;
+    onlyPromoRef.current = next;
+    setOnlyPromo(next);
+    const q = query.trim();
+    if (next) {
+      // Ativando: se há query, re-busca com filtro; senão lista todas as ofertas
+      if (q.length >= 2) runSearch(q);
+      else runListarPromocoes();
+    } else {
+      // Desativando: se há query, re-busca sem filtro; senão limpa
+      if (q.length >= 2) runSearch(q);
+      else {
+        setResults([]);
+        setSelected(null);
+        setError(null);
+      }
+    }
+  };
+
+  const runListarPromocoes = async () => {
+    const reqId = ++reqIdRef.current;
+    const stale = () => reqId !== reqIdRef.current;
+    setError(null);
+    setSelected(null);
+    setLoading(true);
+    try {
+      const list = await listarPromocoes();
+      if (stale()) return;
+      setResults(list);
+      if (list.length === 0) setError("Nenhum produto em oferta no momento.");
+    } catch (e: any) {
+      if (stale()) return;
+      console.error(e);
+      setError(e?.message ?? "Erro ao listar promoções.");
+      setResults([]);
     } finally {
       if (!stale()) setLoading(false);
     }
@@ -244,10 +327,14 @@ function Index() {
 
   const clear = () => {
     setQuery("");
-    setResults([]);
     setSelected(null);
     setError(null);
-    inputRef.current?.focus();
+    if (onlyPromoRef.current) {
+      runListarPromocoes();
+    } else {
+      setResults([]);
+      inputRef.current?.focus();
+    }
   };
 
   // Esc no desktop = nova consulta
@@ -326,6 +413,20 @@ function Index() {
               </Button>
             </div>
           </form>
+
+          <button
+            type="button"
+            onClick={togglePromo}
+            className={`mt-2 flex h-10 w-full items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors ${
+              onlyPromo
+                ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 ring-1 ring-primary-foreground/30"
+            }`}
+            aria-pressed={onlyPromo}
+          >
+            <Percent className="h-4 w-4" />
+            Apenas ofertas
+          </button>
         </header>
       </div>
 
@@ -383,7 +484,7 @@ function Index() {
         {showResultsList && !loading && (
           <Card className="max-h-[70vh] divide-y overflow-y-auto">
             <div className="sticky top-0 z-10 bg-card px-3 py-2 text-xs font-medium text-muted-foreground">
-              {results.length} produtos encontrados
+              {results.length} {onlyPromo ? "produtos em oferta" : "produtos encontrados"}
             </div>
             {results.map((p) => {
               const preco = toNumber(p.sale_price);
