@@ -3,8 +3,6 @@ import { BrowserMultiFormatReader, BrowserCodeReader } from "@zxing/browser";
 // `@zxing/library` é CommonJS: named exports não resolvem no SSR do Vite.
 import zxingLibrary from "@zxing/library";
 
-const { BarcodeFormat, DecodeHintType } = zxingLibrary;
-type DecodeHintType = (typeof DecodeHintType)[keyof typeof DecodeHintType];
 import { Loader2, CameraOff, RefreshCw, SwitchCamera } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
