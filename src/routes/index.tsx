@@ -136,6 +136,22 @@ function Index() {
 
   const reqIdRef = useRef(0);
 
+  // Divide o termo em palavras: todas precisam aparecer no nome (AND)
+  const tokenize = (q: string) => {
+    const parts = q.split(/\s+/).filter(Boolean);
+    const big = parts.filter((p) => p.length > 1);
+    return (big.length > 0 ? big : parts).slice(0, 5);
+  };
+
+  const buscarPorNome = async (q: string) => {
+    let qb = supabase.from("products").select(COLUMNS);
+    for (const t of tokenize(q)) qb = qb.ilike("name", `%${t}%`);
+    const { data, error } = await qb.order("name").limit(NAME_LIMIT);
+    if (error) throw error;
+    return (data ?? []) as unknown as Produto[];
+  };
+
+
   const runSearch = async (raw: string) => {
     const q = raw.trim();
     setError(null);
@@ -166,16 +182,22 @@ function Index() {
         let list = (data ?? []) as unknown as Produto[];
         if (list.length === 0) {
           // Sem correspondência exata: busca parcial por nome ou código de barras
-          const { data: partial, error: err2 } = await supabase
-            .from("products")
-            .select(COLUMNS)
-            .or(`name.ilike.%${q}%,barcode.ilike.%${q}%`)
-            .order("name")
-            .limit(NAME_LIMIT);
-          if (err2) throw err2;
+          const [porNome, porBarcode] = await Promise.all([
+            buscarPorNome(q),
+            supabase
+              .from("products")
+              .select(COLUMNS)
+              .ilike("barcode", `%${q}%`)
+              .limit(NAME_LIMIT),
+          ]);
+          if (porBarcode.error) throw porBarcode.error;
           if (stale()) return;
-          list = (partial ?? []) as unknown as Produto[];
+          const extras = (porBarcode.data ?? []) as unknown as Produto[];
+          const mapa = new Map<number, Produto>();
+          for (const p of [...porNome, ...extras]) mapa.set(p.codigo, p);
+          list = [...mapa.values()];
         }
+
         if (list.length === 1) {
           setSelected(list[0]);
           setResults([]);
@@ -189,16 +211,8 @@ function Index() {
           setError(`Nenhum produto encontrado com o código "${q}".`);
         }
       } else {
-        const { data, error } = await supabase
-          .from("products")
-          .select(COLUMNS)
-          .ilike("name", `%${q}%`)
-          .order("name")
-          .limit(NAME_LIMIT);
-
-        if (error) throw error;
+        const list = await buscarPorNome(q);
         if (stale()) return;
-        const list = (data ?? []) as unknown as Produto[];
         setResults(list);
         setSelected(list.length === 1 ? list[0] : null);
         if (list.length === 1) pushHistory(list[0]);
