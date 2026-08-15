@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BrowserMultiFormatReader, BrowserCodeReader } from "@zxing/browser";
 // `@zxing/library` é CommonJS: named exports não resolvem no SSR do Vite.
-import zxingLibrary from "@zxing/library";
-
+// `@zxing/browser` reexporta BarcodeFormat com segurança.
+import {
+  BrowserMultiFormatReader,
+  BrowserCodeReader,
+  BarcodeFormat,
+} from "@zxing/browser";
 import { Loader2, CameraOff, RefreshCw, SwitchCamera } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -13,11 +16,10 @@ interface Props {
   onDetected: (code: string) => void;
 }
 
-const { BarcodeFormat, DecodeHintType } = zxingLibrary;
-
+// DecodeHintType.POSSIBLE_FORMATS = 2, TRY_HARDER = 3
 const HINTS = new Map<number, unknown>([
   [
-    DecodeHintType.POSSIBLE_FORMATS,
+    2,
     [
       BarcodeFormat.EAN_13,
       BarcodeFormat.EAN_8,
