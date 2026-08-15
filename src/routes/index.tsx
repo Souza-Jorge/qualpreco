@@ -379,7 +379,7 @@ function Index() {
                     setSelected(p);
                     pushHistory(p);
                   }}
-                  className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-2 text-left transition-colors hover:bg-accent"
+                  className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-accent active:bg-accent"
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
