@@ -8,6 +8,7 @@ import {
   History,
   SearchX,
   RotateCcw,
+  Percent,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase, toNumber, type Produto } from "@/integrations/supabase/client";
