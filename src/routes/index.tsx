@@ -199,7 +199,7 @@ function Index() {
           .select(COLUMNS)
           .or(filter)
           .limit(NUM_LIMIT);
-        if (onlyPromo) {
+        if (onlyPromoRef.current) {
           const todayStr = new Date().toLocaleDateString("en-CA");
           numQb = numQb
             .not("promo_price", "is", null)
