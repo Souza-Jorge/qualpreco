@@ -182,15 +182,20 @@ function Index() {
         let list = (data ?? []) as unknown as Produto[];
         if (list.length === 0) {
           // Sem correspondência exata: busca parcial por nome ou código de barras
-          const { data: partial, error: err2 } = await supabase
-            .from("products")
-            .select(COLUMNS)
-            .or(`name.ilike.%${q}%,barcode.ilike.%${q}%`)
-            .order("name")
-            .limit(NAME_LIMIT);
-          if (err2) throw err2;
+          const [porNome, porBarcode] = await Promise.all([
+            buscarPorNome(q),
+            supabase
+              .from("products")
+              .select(COLUMNS)
+              .ilike("barcode", `%${q}%`)
+              .limit(NAME_LIMIT),
+          ]);
+          if (porBarcode.error) throw porBarcode.error;
           if (stale()) return;
-          list = (partial ?? []) as unknown as Produto[];
+          const extras = (porBarcode.data ?? []) as unknown as Produto[];
+          const mapa = new Map<number, Produto>();
+          for (const p of [...porNome, ...extras]) mapa.set(p.codigo, p);
+          list = [...mapa.values()];
         }
 
         if (list.length === 1) {
