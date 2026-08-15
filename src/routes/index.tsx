@@ -269,6 +269,7 @@ function Index() {
 
   const togglePromo = () => {
     const next = !onlyPromo;
+    onlyPromoRef.current = next;
     setOnlyPromo(next);
     const q = query.trim();
     if (next) {
