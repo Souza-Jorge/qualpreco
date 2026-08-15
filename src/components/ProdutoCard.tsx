@@ -8,6 +8,20 @@ const brl = (v: number | null | undefined) =>
     ? "—"
     : v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+const brlParts = (v: number | null | undefined) => {
+  if (v == null) return { currency: "—", number: "" };
+  const parts = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).formatToParts(v);
+  const currency = parts.find((p) => p.type === "currency")?.value ?? "R$";
+  const number = parts
+    .filter((p) => p.type !== "currency")
+    .map((p) => p.value)
+    .join("");
+  return { currency, number };
+};
+
 const fmtDate = (d: string | null) => {
   if (!d) return null;
   const date = new Date(d);
@@ -79,11 +93,16 @@ export function ProdutoCard({ produto }: { produto: Produto }) {
           )}
           <div className="flex flex-wrap items-baseline gap-3">
             <span
-              className={`text-4xl font-bold md:text-5xl ${
+              className={`inline-flex items-baseline gap-1.5 font-bold ${
                 promoAtiva ? "text-success" : "text-primary"
               }`}
             >
-              {brl(precoFinal)}
+              <span className="text-2xl md:text-3xl">
+                {brlParts(precoFinal).currency}
+              </span>
+              <span className="text-4xl md:text-5xl">
+                {brlParts(precoFinal).number}
+              </span>
             </span>
             {promoAtiva && precoVenda != null && (
               <span className="text-lg text-muted-foreground line-through">
