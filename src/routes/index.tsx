@@ -224,6 +224,18 @@ function Index() {
     inputRef.current?.focus();
   };
 
+  // Esc no desktop = nova consulta
+  useEffect(() => {
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || scanOpen) return;
+      if (!query && !selected && results.length === 0) return;
+      clear();
+    };
+    window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, selected, results.length, scanOpen]);
+
   const onScan = (code: string) => {
     setQuery(code);
     runSearch(code);
