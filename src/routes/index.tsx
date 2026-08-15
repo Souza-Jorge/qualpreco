@@ -275,7 +275,7 @@ function Index() {
                   inputMode="search"
                   enterKeyHint="search"
                   autoFocus
-                  className="h-14 border-0 bg-background pl-11 pr-11 text-base shadow-sm"
+                  className="h-14 border-0 bg-background pl-11 pr-11 text-base text-foreground shadow-sm placeholder:text-muted-foreground"
                 />
                 {query && (
                   <button
