@@ -174,7 +174,18 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
           />
 
           {status === "running" && (
-            <div className="pointer-events-none absolute inset-x-8 top-1/2 h-0.5 -translate-y-1/2 bg-destructive shadow-[0_0_8px_var(--destructive)]" />
+            <div className="pointer-events-none absolute inset-0">
+              {/* Máscara escura em volta da área de leitura */}
+              <div className="absolute inset-0 bg-black/50 [clip-path:polygon(0_0,100%_0,100%_100%,0_100%,0_28%,8%_28%,8%_72%,92%_72%,92%_28%,0_28%)]" />
+              {/* Cantos da moldura */}
+              <div className="absolute inset-x-[8%] top-[28%] h-[44%]">
+                <span className="absolute left-0 top-0 h-6 w-6 rounded-tl-md border-l-4 border-t-4 border-primary-foreground" />
+                <span className="absolute right-0 top-0 h-6 w-6 rounded-tr-md border-r-4 border-t-4 border-primary-foreground" />
+                <span className="absolute bottom-0 left-0 h-6 w-6 rounded-bl-md border-b-4 border-l-4 border-primary-foreground" />
+                <span className="absolute bottom-0 right-0 h-6 w-6 rounded-br-md border-b-4 border-r-4 border-primary-foreground" />
+                <div className="absolute inset-x-2 top-1/2 h-0.5 -translate-y-1/2 bg-destructive shadow-[0_0_8px_var(--destructive)]" />
+              </div>
+            </div>
           )}
 
           {status === "starting" && (
