@@ -439,6 +439,17 @@ function Index() {
         )}
 
 
+        {!query && !loading && history.length === 0 && (
+          <Card className="flex flex-col items-center gap-2 p-8 text-center">
+            <Search className="h-10 w-10 text-muted-foreground" />
+            <p className="text-sm font-medium">Comece uma consulta</p>
+            <p className="max-w-xs text-xs text-muted-foreground">
+              Digite o código, parte do nome do produto ou toque em Escanear para
+              ler o código de barras com a câmera.
+            </p>
+          </Card>
+        )}
+
         {!query && !loading && history.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
