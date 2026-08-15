@@ -55,7 +55,7 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
   const [status, setStatus] = useState<Status>("starting");
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
-  const [deviceIndex, setDeviceIndex] = useState(0);
+  const [deviceId, setDeviceId] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
 
   const stopCamera = useCallback(() => {
@@ -77,10 +77,9 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
     const reader = new BrowserMultiFormatReader(HINTS as never);
 
     const start = async () => {
-      const chosen = devices[deviceIndex];
       const constraints: MediaStreamConstraints = {
-        video: chosen?.deviceId
-          ? { deviceId: { exact: chosen.deviceId } }
+        video: deviceId
+          ? { deviceId: { exact: deviceId } }
           : { facingMode: { ideal: "environment" } },
       };
 
@@ -136,11 +135,14 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
       cancelled = true;
       stopCamera();
     };
-  }, [open, deviceIndex, attempt, devices, onDetected, onClose, stopCamera]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, deviceId, attempt]);
 
   const trocarCamera = () => {
     if (devices.length < 2) return;
-    setDeviceIndex((i) => (i + 1) % devices.length);
+    const current = devices.findIndex((d) => d.deviceId === deviceId);
+    const next = devices[(current + 1) % devices.length];
+    setDeviceId(next?.deviceId ?? null);
   };
 
   return (
