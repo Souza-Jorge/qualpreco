@@ -148,7 +148,7 @@ function Index() {
 
   const buscarPorNome = async (q: string) => {
     let qb = supabase.from("products").select(COLUMNS);
-    if (onlyPromo) {
+    if (onlyPromoRef.current) {
       const todayStr = new Date().toLocaleDateString("en-CA");
       qb = qb
         .not("promo_price", "is", null)
