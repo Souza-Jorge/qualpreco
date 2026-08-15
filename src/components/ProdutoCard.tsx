@@ -24,7 +24,12 @@ const brlParts = (v: number | null | undefined) => {
 
 const fmtDate = (d: string | null) => {
   if (!d) return null;
-  const date = new Date(d);
+  // Datas vêm como "YYYY-MM-DD" (date-only). new Date() interpreta isso como
+  // meia-noite UTC, exibindo o dia anterior em fusos com offset negativo (ex.:
+  // 2026-08-15 -> 14/08 em UTC-3). Montamos a data local para exibir o dia correto.
+  const [y, m, day] = d.split("-").map(Number);
+  if (!y || !m || !day) return null;
+  const date = new Date(y, m - 1, day);
   if (isNaN(date.getTime())) return null;
   return date.toLocaleDateString("pt-BR");
 };
@@ -41,11 +46,14 @@ export function ProdutoCard({ produto }: { produto: Produto }) {
   const precoPromo = toNumber(produto.promo_price);
   const precoCusto = toNumber(produto.cost_price);
 
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
+  // Data de hoje no fuso local, no formato YYYY-MM-DD. Comparação por string
+  // é fuso-safe e cronológica para esse formato (evita o bug de new Date() que
+  // interpreta "2026-08-15" como meia-noite UTC, marcando como vencida uma promo
+  // que termina hoje em fusos como UTC-3).
+  const todayStr = new Date().toLocaleDateString("en-CA");
   const promoAtiva =
     precoPromo != null &&
-    (!produto.promo_end || new Date(produto.promo_end).getTime() >= hoje.getTime());
+    (!produto.promo_end || produto.promo_end >= todayStr);
 
   const precoFinal = promoAtiva ? precoPromo : precoVenda;
 
