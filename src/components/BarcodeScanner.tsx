@@ -33,10 +33,21 @@ const HINTS = new Map<number, unknown>([
   [3, true],
 ]);
 
+function suportaCamera(): boolean {
+  return (
+    typeof navigator !== "undefined" &&
+    !!navigator.mediaDevices &&
+    typeof navigator.mediaDevices.getUserMedia === "function"
+  );
+}
+
 function mensagemDeErro(e: unknown): string {
   const name = (e as { name?: string } | null)?.name ?? "";
   if (typeof window !== "undefined" && !window.isSecureContext) {
     return "A câmera só funciona em conexões seguras (HTTPS). Abra o app pelo endereço https.";
+  }
+  if (!suportaCamera()) {
+    return "Este navegador não suporta leitura pela câmera. Digite o código na busca.";
   }
   switch (name) {
     case "NotAllowedError":
@@ -58,6 +69,7 @@ type Status = "starting" | "running" | "error";
 export function BarcodeScanner({ open, onClose, onDetected }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const controlsRef = useRef<{ stop: () => void } | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const [status, setStatus] = useState<Status>("starting");
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
@@ -68,8 +80,10 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
     controlsRef.current?.stop();
     controlsRef.current = null;
     const video = videoRef.current;
-    const stream = video?.srcObject as MediaStream | null;
-    stream?.getTracks().forEach((t) => t.stop());
+    const doStream = video?.srcObject as MediaStream | null;
+    doStream?.getTracks().forEach((t) => t.stop());
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
     if (video) video.srcObject = null;
   }, []);
 
@@ -80,61 +94,95 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
     setStatus("starting");
     setErrorMsg("");
 
+    if (!suportaCamera()) {
+      setErrorMsg(mensagemDeErro(null));
+      setStatus("error");
+      return;
+    }
+
     const reader = new BrowserMultiFormatReader(HINTS as never);
 
-    const start = async () => {
-      const constraints: MediaStreamConstraints = {
-        video: deviceId
-          ? { deviceId: { exact: deviceId } }
-          : { facingMode: { ideal: "environment" } },
-      };
+    // Preferência: câmera escolhida > traseira exata > traseira ideal > qualquer uma
+    const tentativas: MediaTrackConstraints[] = deviceId
+      ? [{ deviceId: { exact: deviceId } }]
+      : [
+          { facingMode: { exact: "environment" } },
+          { facingMode: { ideal: "environment" } },
+          {},
+        ];
 
-      const controls = await reader.decodeFromConstraints(
-        constraints,
-        videoRef.current!,
-        (result) => {
-          if (cancelled || !result) return;
-          cancelled = true;
-          const text = result.getText();
-          stopCamera();
-          onDetected(text);
-          onClose();
-        }
-      );
-      controlsRef.current = controls;
-      if (!cancelled) setStatus("running");
+    const aoDetectar = (text: string) => {
+      if (cancelled) return;
+      cancelled = true;
+      stopCamera();
+      onDetected(text);
+      onClose();
+    };
 
+    const esperarVideoPronto = async () => {
+      const video = videoRef.current;
+      if (!video) return;
+      if (video.readyState < 2) {
+        await new Promise<void>((resolve) => {
+          const done = () => {
+            video.removeEventListener("loadeddata", done);
+            resolve();
+          };
+          video.addEventListener("loadeddata", done);
+          setTimeout(done, 4000);
+        });
+      }
       try {
-        const list = await BrowserCodeReader.listVideoInputDevices();
-        if (!cancelled) setDevices(list);
+        await video.play();
       } catch {
-        /* lista de câmeras é opcional */
+        /* alguns navegadores já iniciam sozinhos */
       }
     };
 
-    start().catch(async (e) => {
-      if (cancelled) return;
-      // Fallback: qualquer câmera disponível
-      try {
-        const controls = await reader.decodeFromConstraints(
-          { video: true },
-          videoRef.current!,
-          (result) => {
-            if (cancelled || !result) return;
-            cancelled = true;
-            stopCamera();
-            onDetected(result.getText());
-            onClose();
+    const start = async () => {
+      let ultimoErro: unknown = null;
+
+      for (const video of tentativas) {
+        try {
+          const controls = await reader.decodeFromConstraints(
+            { video },
+            videoRef.current!,
+            (result) => {
+              if (!result) return;
+              aoDetectar(result.getText());
+            }
+          );
+          if (cancelled) {
+            controls.stop();
+            return;
           }
-        );
-        controlsRef.current = controls;
-        if (!cancelled) setStatus("running");
-      } catch (e2) {
-        if (cancelled) return;
-        console.error("Erro ao iniciar câmera:", e2 ?? e);
-        setErrorMsg(mensagemDeErro(e2 ?? e));
-        setStatus("error");
+          controlsRef.current = controls;
+          streamRef.current =
+            (videoRef.current?.srcObject as MediaStream | null) ?? null;
+
+          await esperarVideoPronto();
+          if (!cancelled) setStatus("running");
+
+          try {
+            const list = await BrowserCodeReader.listVideoInputDevices();
+            if (!cancelled) setDevices(list);
+          } catch {
+            /* lista de câmeras é opcional */
+          }
+          return;
+        } catch (e) {
+          ultimoErro = e;
+        }
       }
+
+      throw ultimoErro;
+    };
+
+    start().catch((e) => {
+      if (cancelled) return;
+      console.error("Erro ao iniciar câmera:", e);
+      setErrorMsg(mensagemDeErro(e));
+      setStatus("error");
     });
 
     return () => {
@@ -175,7 +223,7 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
             muted
           />
 
-          {status === "running" && (
+          {status !== "error" && (
             <div className="pointer-events-none absolute inset-0">
               {/* Máscara escura em volta da área de leitura */}
               <div className="absolute inset-0 bg-black/50 [clip-path:polygon(0_0,100%_0,100%_100%,0_100%,0_28%,8%_28%,8%_72%,92%_72%,92%_28%,0_28%)]" />
@@ -185,16 +233,31 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
                 <span className="absolute right-0 top-0 h-6 w-6 rounded-tr-md border-r-4 border-t-4 border-primary-foreground" />
                 <span className="absolute bottom-0 left-0 h-6 w-6 rounded-bl-md border-b-4 border-l-4 border-primary-foreground" />
                 <span className="absolute bottom-0 right-0 h-6 w-6 rounded-br-md border-b-4 border-r-4 border-primary-foreground" />
-                <div className="absolute inset-x-2 top-1/2 h-0.5 -translate-y-1/2 bg-destructive shadow-[0_0_8px_var(--destructive)]" />
+                {status === "running" && (
+                  <div className="absolute inset-x-2 top-1/2 h-0.5 -translate-y-1/2 bg-destructive shadow-[0_0_8px_var(--destructive)]" />
+                )}
               </div>
             </div>
           )}
 
           {status === "starting" && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/70 text-primary-foreground">
-              <Loader2 className="h-6 w-6 animate-spin" />
+            <div className="absolute inset-x-0 bottom-3 flex items-center justify-center gap-2 text-primary-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
               <span className="text-sm">Iniciando câmera...</span>
             </div>
+          )}
+
+          {status === "running" && devices.length > 1 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={trocarCamera}
+              aria-label="Trocar câmera"
+              className="absolute right-2 top-2 h-8 gap-1 bg-black/40 px-2 text-primary-foreground hover:bg-black/60 hover:text-primary-foreground"
+            >
+              <SwitchCamera className="h-4 w-4" />
+              <span className="text-xs">Trocar</span>
+            </Button>
           )}
 
           {status === "error" && (
@@ -213,19 +276,11 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-sm text-muted-foreground">
-            {status === "running"
-              ? "Aponte a câmera para o código de barras"
-              : "Você também pode digitar o código na busca"}
-          </p>
-          {devices.length > 1 && status === "running" && (
-            <Button variant="outline" size="sm" onClick={trocarCamera}>
-              <SwitchCamera className="mr-2 h-4 w-4" />
-              Trocar
-            </Button>
-          )}
-        </div>
+        <p className="text-sm text-muted-foreground">
+          {status === "running"
+            ? "Aponte a câmera para o código de barras"
+            : "Você também pode digitar o código na busca"}
+        </p>
       </DialogContent>
     </Dialog>
   );
