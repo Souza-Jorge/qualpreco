@@ -212,11 +212,20 @@ function Index() {
           // Sem correspondência exata: busca parcial por nome ou código de barras
           const [porNome, porBarcode] = await Promise.all([
             buscarPorNome(q),
-            supabase
-              .from("products")
-              .select(COLUMNS)
-              .ilike("barcode", `%${q}%`)
-              .limit(NAME_LIMIT),
+            (async () => {
+              let bqb = supabase
+                .from("products")
+                .select(COLUMNS)
+                .ilike("barcode", `%${q}%`)
+                .limit(NAME_LIMIT);
+              if (onlyPromo) {
+                const todayStr = new Date().toLocaleDateString("en-CA");
+                bqb = bqb
+                  .not("promo_price", "is", null)
+                  .or(`promo_end.is.null,promo_end.gte.${todayStr}`);
+              }
+              return bqb;
+            })(),
           ]);
           if (porBarcode.error) throw porBarcode.error;
           if (stale()) return;
