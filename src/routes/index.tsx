@@ -48,6 +48,7 @@ function Index() {
   const [scanOpen, setScanOpen] = useState(false);
   const [history, setHistory] = useState<HistItem[]>([]);
   const [onlyPromo, setOnlyPromo] = useState(false);
+  const onlyPromoRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
