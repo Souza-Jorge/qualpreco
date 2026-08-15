@@ -192,6 +192,7 @@ function Index() {
           if (stale()) return;
           list = (partial ?? []) as unknown as Produto[];
         }
+
         if (list.length === 1) {
           setSelected(list[0]);
           setResults([]);
