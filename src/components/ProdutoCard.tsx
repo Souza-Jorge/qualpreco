@@ -35,6 +35,12 @@ export function ProdutoCard({ produto }: { produto: Produto }) {
 
   const precoFinal = promoAtiva ? precoPromo : precoVenda;
 
+  // Margem sobre o custo, considerando o preço final (com promoção se ativa).
+  const margemPct =
+    precoCusto != null && precoFinal != null && precoCusto > 0
+      ? ((precoFinal - precoCusto) / precoCusto) * 100
+      : null;
+
   const diasValidade = daysUntil(produto.data_validade);
   const validadeVencida = diasValidade != null && diasValidade < 0;
   const validadeProxima = diasValidade != null && diasValidade >= 0 && diasValidade <= 30;
@@ -115,6 +121,21 @@ export function ProdutoCard({ produto }: { produto: Produto }) {
                   </dt>
                   <dd className="text-lg font-semibold text-foreground">
                     {brl(precoCusto)}
+                  </dd>
+                </div>
+              )}
+              {margemPct != null && (
+                <div>
+                  <dt className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                    Margem
+                  </dt>
+                  <dd
+                    className={`text-lg font-semibold ${
+                      margemPct >= 0 ? "text-success" : "text-destructive"
+                    }`}
+                  >
+                    {margemPct >= 0 ? "+" : ""}
+                    {margemPct.toFixed(0)}%
                   </dd>
                 </div>
               )}
