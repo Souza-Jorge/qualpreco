@@ -1,6 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ScanLine, Search, X, Loader2, History } from "lucide-react";
+import {
+  ScanLine,
+  Search,
+  X,
+  Loader2,
+  History,
+  SearchX,
+  RotateCcw,
+} from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase, toNumber, type Produto } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
