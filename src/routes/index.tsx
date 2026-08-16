@@ -521,17 +521,17 @@ function Index() {
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="truncate text-sm font-medium">{p.name}</span>
-                      {promoAtiva && (
-                        <span className="shrink-0 rounded bg-destructive px-1.5 py-0.5 text-[10px] font-bold leading-none text-destructive-foreground">
-                          PROMO
-                        </span>
-                      )}
                       {promoAtiva && (
                         <span className="shrink-0 text-[10px] font-medium text-destructive">
                           {p.promo_end
                             ? `até ${fmtDateList(p.promo_end)}`
                             : "Oferta sem prazo"}
+                        </span>
+                      )}
+                      <span className="truncate text-sm font-medium">{p.name}</span>
+                      {promoAtiva && (
+                        <span className="shrink-0 rounded bg-destructive px-1.5 py-0.5 text-[10px] font-bold leading-none text-destructive-foreground">
+                          PROMO
                         </span>
                       )}
                     </div>
