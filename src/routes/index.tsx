@@ -531,6 +531,11 @@ function Index() {
                           · {p.category_name}
                         </span>
                       )}
+                      {promoAtiva && p.promo_end && (
+                        <span className="shrink-0 text-destructive">
+                          · Oferta até {fmtDateList(p.promo_end)}
+                        </span>
+                      )}
                       <span
                         className={`ml-auto shrink-0 font-medium ${
                           semEstoque ? "text-destructive" : "text-success"
