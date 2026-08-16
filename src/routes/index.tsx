@@ -37,6 +37,17 @@ const COLUMNS =
 
 const HIST_KEY = "consulta_historico_v2";
 
+// Datas vêm como "YYYY-MM-DD" (date-only). Monta a data local para evitar o
+// bug de new Date() que interpreta como meia-noite UTC (dia anterior em UTC-3).
+const fmtDateList = (d: string | null) => {
+  if (!d) return null;
+  const [y, m, day] = d.split("-").map(Number);
+  if (!y || !m || !day) return null;
+  const date = new Date(y, m - 1, day);
+  if (isNaN(date.getTime())) return null;
+  return date.toLocaleDateString("pt-BR");
+};
+
 type HistItem = { codigo: number; name: string };
 
 function Index() {
@@ -529,6 +540,11 @@ function Index() {
                       {p.category_name && (
                         <span className="hidden truncate md:inline">
                           · {p.category_name}
+                        </span>
+                      )}
+                      {promoAtiva && p.promo_end && (
+                        <span className="shrink-0 text-destructive">
+                          · Oferta até {fmtDateList(p.promo_end)}
                         </span>
                       )}
                       <span
