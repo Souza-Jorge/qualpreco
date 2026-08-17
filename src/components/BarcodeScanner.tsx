@@ -86,13 +86,22 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
   const streamRef = useRef<MediaStream | null>(null);
   const startingRef = useRef(false);
   const autoSelecionadaRef = useRef(false);
+  const watchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [status, setStatus] = useState<Status>("starting");
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
 
+  const limparWatchdog = useCallback(() => {
+    if (watchdogRef.current) {
+      clearTimeout(watchdogRef.current);
+      watchdogRef.current = null;
+    }
+  }, []);
+
   const stopCamera = useCallback(() => {
+    limparWatchdog();
     controlsRef.current?.stop();
     controlsRef.current = null;
     const video = videoRef.current;
@@ -102,7 +111,8 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
     streamRef.current = null;
     if (video) video.srcObject = null;
     startingRef.current = false;
-  }, []);
+  }, [limparWatchdog]);
+
 
   // Ao fechar, zera a seleção manual para reabrir sempre na traseira
   useEffect(() => {
