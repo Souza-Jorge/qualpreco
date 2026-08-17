@@ -140,6 +140,23 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
     stopCamera();
     startingRef.current = true;
 
+    // Rede de segurança: nunca ficar preso em "Iniciando câmera..."
+    limparWatchdog();
+    watchdogRef.current = setTimeout(() => {
+      if (cancelled) return;
+      setStatus((s) => {
+        if (s !== "starting") return s;
+        const emIframe =
+          typeof window !== "undefined" && window.self !== window.top;
+        setErrorMsg(
+          emIframe
+            ? "A câmera não respondeu — dentro da pré-visualização o acesso pode estar bloqueado. Abra o app em uma nova aba (URL publicada) e tente de novo."
+            : "A câmera não respondeu a tempo. Verifique a permissão do navegador e tente novamente."
+        );
+        return "error";
+      });
+    }, 12000);
+
     const reader = new BrowserMultiFormatReader(HINTS as never);
 
     // Preferência: câmera escolhida > traseira exata > traseira ideal > qualquer uma
@@ -159,24 +176,52 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
       onClose();
     };
 
-    const esperarVideoPronto = async () => {
+    const marcarRodando = () => {
+      if (cancelled) return;
+      limparWatchdog();
+      setStatus("running");
+    };
+
+    // Não bloqueia a interface: o que acontecer primeiro libera o estado
+    const esperarVideoPronto = () => {
       const video = videoRef.current;
       if (!video) return;
-      if (video.readyState < 2) {
-        await new Promise<void>((resolve) => {
-          const done = () => {
-            video.removeEventListener("loadeddata", done);
-            resolve();
-          };
-          video.addEventListener("loadeddata", done);
-          setTimeout(done, 4000);
-        });
+
+      const pronto = () =>
+        video.readyState >= 2 || (video.videoWidth ?? 0) > 0;
+
+      if (pronto()) {
+        console.debug("[scanner] vídeo já pronto");
+        marcarRodando();
+        return;
       }
-      try {
-        await video.play();
-      } catch {
+
+      let feito = false;
+      const finalizar = (origem: string) => {
+        if (feito) return;
+        feito = true;
+        clearInterval(poll);
+        video.removeEventListener("loadeddata", onLoaded);
+        video.removeEventListener("playing", onPlaying);
+        console.debug("[scanner] vídeo pronto via", origem);
+        marcarRodando();
+      };
+      const onLoaded = () => finalizar("loadeddata");
+      const onPlaying = () => finalizar("playing");
+
+      video.addEventListener("loadeddata", onLoaded);
+      video.addEventListener("playing", onPlaying);
+      const poll = setInterval(() => {
+        if (cancelled) {
+          clearInterval(poll);
+          return;
+        }
+        if (pronto()) finalizar("polling");
+      }, 200);
+
+      video.play().catch(() => {
         /* alguns navegadores já iniciam sozinhos */
-      }
+      });
     };
 
     const start = async () => {
@@ -184,6 +229,7 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
 
       for (const video of tentativas) {
         try {
+          console.debug("[scanner] tentando constraints", video);
           const controls = await reader.decodeFromConstraints(
             { video },
             videoRef.current!,
@@ -200,9 +246,13 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
           const stream =
             (videoRef.current?.srcObject as MediaStream | null) ?? null;
           streamRef.current = stream;
+          console.debug("[scanner] stream obtido:", !!stream);
 
-          await esperarVideoPronto();
-          if (!cancelled) setStatus("running");
+          // Se o stream já está ativo, mostra a imagem imediatamente
+          if (stream?.getVideoTracks().some((t) => t.readyState === "live")) {
+            marcarRodando();
+          }
+          esperarVideoPronto();
 
           try {
             const list = await BrowserCodeReader.listVideoInputDevices();
@@ -210,6 +260,7 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
             setDevices(list);
 
             // Se caímos numa câmera frontal, troca automaticamente pela traseira
+            // (no máximo uma vez por abertura, para não reiniciar em laço)
             if (!deviceId && !autoSelecionadaRef.current && list.length > 1) {
               const track = stream?.getVideoTracks()[0];
               const settings = track?.getSettings?.() ?? {};
@@ -240,6 +291,7 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
       .catch((e) => {
         if (cancelled) return;
         console.error("Erro ao iniciar câmera:", e);
+        limparWatchdog();
         setErrorMsg(mensagemDeErro(e));
         setStatus("error");
       })
@@ -253,6 +305,7 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, deviceId, attempt]);
+
 
 
   const trocarCamera = () => {
