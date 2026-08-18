@@ -325,18 +325,20 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
         }
       }}
     >
-      <DialogContent className="max-w-md">
+      <DialogContent className="w-[calc(100%-1rem)] max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>Escanear código de barras</DialogTitle>
         </DialogHeader>
 
-        <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-black">
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-black">
           <video
-            ref={videoRef}
-            className="h-full w-full object-cover"
-            autoPlay
-            playsInline
-            muted
+              ref={videoRef}
+              className={`h-full w-full object-cover transition-opacity duration-200 ${
+                  status === "running" ? "opacity-100" : "opacity-0"
+              }`}
+             autoPlay
+             playsInline
+             muted
           />
 
           {status !== "error" && (
@@ -344,7 +346,7 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
               {/* Máscara escura em volta da área de leitura */}
               <div className="absolute inset-0 bg-black/50 [clip-path:polygon(0_0,100%_0,100%_100%,0_100%,0_28%,8%_28%,8%_72%,92%_72%,92%_28%,0_28%)]" />
               {/* Cantos da moldura */}
-              <div className="absolute inset-x-[8%] top-[28%] h-[44%]">
+              <div className="absolute inset-x-[6%] top-[20%] h-[60%]">
                 <span className="absolute left-0 top-0 h-6 w-6 rounded-tl-md border-l-4 border-t-4 border-primary-foreground" />
                 <span className="absolute right-0 top-0 h-6 w-6 rounded-tr-md border-r-4 border-t-4 border-primary-foreground" />
                 <span className="absolute bottom-0 left-0 h-6 w-6 rounded-bl-md border-b-4 border-l-4 border-primary-foreground" />
@@ -357,11 +359,13 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
           )}
 
           {status === "starting" && (
-            <div className="absolute inset-x-0 bottom-3 flex items-center justify-center gap-2 text-primary-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="text-sm">Iniciando câmera...</span>
-            </div>
-          )}
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-                       black/70 text-primary-foreground">
+                <Loader2 className="h-8 w-8 animate-spin" />
+               <span className="text-sm font-medium">
+                    Iniciando câmera...
+              </span>
+          </div>
+        )}
 
           {status === "running" && devices.length > 1 && (
             <Button
