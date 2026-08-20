@@ -39,3 +39,12 @@ android/.gradle/
 android/app/build/
 android/build/
 android/capacitor-cordova-android-plugins/build/
+
+# Android signing
+android/keystore.properties
+*.jks
+*.p12
+*.keystore
+
+# Release APKs
+releases/**/*.apk

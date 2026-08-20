@@ -1,0 +1,49 @@
+﻿QUALPREÇO
+========================================
+
+VERSÃO
+1.0.0
+
+APPLICATION ID
+br.com.qualpreco.app
+
+VERSION CODE
+1
+
+VERSION NAME
+1.0.0
+
+TIPO
+Android Release
+
+ASSINATURA
+Release / PKCS12
+
+ALIAS
+qualpreco
+
+KEYSTORE
+C:\Users\Dell\Documents\AndroidKeys\qualpreco-release.p12
+
+APK
+QualPreco-1.0.0.apk
+
+STATUS
+Validado em aparelho físico
+
+TESTES REALIZADOS
+- Consulta por código
+- Consulta por nome
+- Scanner de código de barras
+- Promoções
+- Botão voltar
+- Histórico
+- Tratamento de falta de conexão
+- Consulta ao Supabase
+- Instalação do APK Release
+
+OBSERVAÇÃO
+A keystore oficial não deve ser recriada para futuras versões.
+As próximas versões devem utilizar a mesma chave de assinatura.
+
+========================================

@@ -185,6 +185,24 @@ function Index() {
   };
 
 
+  const getFriendlyError = (e: any, context: "search" | "promo") => {
+    const message = String(e?.message ?? e ?? "").toLowerCase();
+
+    if (
+      message.includes("failed to fetch") ||
+      message.includes("network") ||
+      message.includes("fetch") ||
+      message.includes("networkerror") ||
+      !navigator.onLine
+    ) {
+      return "Sem conexão com a internet. Verifique sua conexão e tente novamente.";
+    }
+
+    return context === "promo"
+      ? e?.message ?? "Erro ao listar promoções."
+      : e?.message ?? "Erro ao consultar produtos.";
+  };
+
   const runSearch = async (raw: string) => {
     const q = raw.trim();
     setError(null);
@@ -274,7 +292,7 @@ function Index() {
     } catch (e: any) {
       if (stale()) return;
       console.error(e);
-      setError(e?.message ?? "Erro ao consultar produtos.");
+      setError(getFriendlyError(e, "search"));
       setResults([]);
       setSelected(null);
     } finally {
@@ -316,7 +334,7 @@ function Index() {
     } catch (e: any) {
       if (stale()) return;
       console.error(e);
-      setError(e?.message ?? "Erro ao listar promoções.");
+      setError(getFriendlyError(e, "promo"));
       setResults([]);
     } finally {
       if (!stale()) setLoading(false);
@@ -379,7 +397,7 @@ function Index() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-background">
       <div className="sticky top-0 z-30 border-b border-border/50 bg-primary shadow-md">
-        <header className="mx-auto w-full max-w-3xl px-4 pb-3 pt-4 text-primary-foreground">
+        <header className="mx-auto w-full max-w-3xl px-4 pb-3 pt-6 text-primary-foreground">
           <h1 className="text-xl font-bold leading-tight md:text-2xl">
             Consulta de Preços
           </h1>
@@ -509,7 +527,7 @@ function Index() {
               const fmt = (v: number | null) =>
                 v != null
                   ? v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
-                  : "—";
+                    : "�";
               return (
                 <button
                   key={p.codigo}
@@ -627,3 +645,5 @@ function Index() {
     </div>
   );
 }
+
+
