@@ -3,62 +3,133 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QualPreço</title>
+<title>QualPreço — Xapadão Bebidas</title>
+<meta name="description" content="QualPreço: aplicativo exclusivo para colaboradores da Xapadão Bebidas. Baixe o APK para Android.">
+<meta name="theme-color" content="#111111">
+<meta property="og:title" content="QualPreço — Xapadão Bebidas">
+<meta property="og:description" content="Aplicativo exclusivo para colaboradores. Baixe o APK para Android.">
+<meta property="og:type" content="website">
 
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<div class="container">
-
-    <div class="card">
-
-        <h1>QualPreço</h1>
-
-        <p class="subtitle">
-            Consulte preços de produtos de forma rápida e prática.
-        </p>
-
-        <div class="version">
-            Versão 1.0.0
-        </div>
-
-        <a
-            class="download-btn"
-            href="https://github.com/Souza-Jorge/qualpreco/releases/download/v1.0.0/QualPreco-1.0.0.apk"
-            target="_blank"
-        >
-            📲 Baixar para Android
-        </a>
-
-        <div class="info">
-
-            <h3>Requisitos</h3>
-
-            <ul>
-                <li>Android 7 ou superior</li>
-                <li>Conexão com internet</li>
-            </ul>
-
-            <h3>Instalação</h3>
-
-            <ol>
-                <li>Baixe o APK.</li>
-                <li>Abra o arquivo.</li>
-                <li>Permita a instalação se solicitado.</li>
-                <li>Abra o QualPreço.</li>
-            </ol>
-
-        </div>
-
-        <div class="footer">
-            © QualPreço
-        </div>
-
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <img src="assets/logo-xapadao.png" alt="Xapadão Bebidas"
+           class="brand-logo"
+           onerror="this.style.display='none';document.getElementById('brand-fallback').style.display='flex';">
+      <div id="brand-fallback" class="brand-fallback" style="display:none" aria-hidden="true">
+        <span>XB</span>
+      </div>
+      <div class="brand-name">
+        <strong>Xapadão Bebidas</strong>
+        <small>apresenta</small>
+      </div>
     </div>
+  </div>
+</header>
 
-</div>
+<main class="container">
+
+  <section class="hero card">
+    <div class="hero-mark">Qual<span class="mark-accent">Preço</span></div>
+    <p class="hero-tagline">Aplicativo exclusivo para colaboradores</p>
+    <p class="hero-desc">
+      Ferramenta interna de consulta de preços e promoções.
+      Distribuição restrita — uso autorizado apenas.
+    </p>
+
+    <a class="download-btn" href="https://github.com/Souza-Jorge/qualpreco/releases/download/v1.0.0/QualPreco-1.0.0.apk"
+       download>
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Baixar QualPreço para Android
+    </a>
+
+    <div class="version-pill">Versão 1.0.0 · Android</div>
+  </section>
+
+  <section class="card features">
+    <h2 class="section-title">Recursos</h2>
+    <ul class="features-grid">
+      <li><span class="feat-icon" aria-hidden="true">🔢</span><span>Consulta por código</span></li>
+      <li><span class="feat-icon" aria-hidden="true">🔎</span><span>Consulta por nome</span></li>
+      <li><span class="feat-icon" aria-hidden="true">📷</span><span>Leitura de código de barras</span></li>
+      <li><span class="feat-icon" aria-hidden="true">🏷️</span><span>Consulta de promoções</span></li>
+      <li><span class="feat-icon" aria-hidden="true">🕘</span><span>Histórico de consultas</span></li>
+      <li><span class="feat-icon" aria-hidden="true">🔗</span><span>Funcionamento integrado aos dados da empresa</span></li>
+    </ul>
+  </section>
+
+  <div class="split">
+
+    <section class="card install">
+      <h2 class="section-title">Como instalar</h2>
+      <ol class="install-steps">
+        <li><span class="step-num">1</span> Baixe o aplicativo</li>
+        <li><span class="step-num">2</span> Abra o APK no celular</li>
+        <li><span class="step-num">3</span> Autorize a instalação quando solicitado</li>
+        <li><span class="step-num">4</span> Abra o QualPreço</li>
+      </ol>
+    </section>
+
+    <section class="card qr">
+      <h2 class="section-title">Instale pelo celular</h2>
+      <p class="qr-hint">Escaneie o QR Code para abrir esta página no celular.</p>
+      <div class="qr-frame">
+        <div id="qrcode"></div>
+      </div>
+      <p class="qr-url" id="qr-url"></p>
+    </section>
+
+  </div>
+
+  <section class="notice card">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 9v4"/><path d="M12 17h.01"/>
+      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+    </svg>
+    <p>Uso exclusivo para colaboradores autorizados da Xapadão Bebidas.</p>
+  </section>
+
+  <footer class="site-footer">
+    © <span id="year"></span> Xapadão Bebidas · QualPreço
+  </footer>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  (function () {
+    var target = window.location.href.split('#')[0];
+    var el = document.getElementById('qrcode');
+    if (el && typeof QRCode !== 'undefined') {
+      try {
+        /* qrcodejs renders an <img>/<table> inside the element */
+        new QRCode(el, {
+          text: target,
+          width: 200,
+          height: 200,
+          correctLevel: QRCode.CorrectLevel ? QRCode.CorrectLevel.M : 1
+        });
+      } catch (e) {
+        el.textContent = 'QR indisponível offline.';
+      }
+    }
+    var urlEl = document.getElementById('qr-url');
+    if (urlEl) {
+      urlEl.textContent = target;
+    }
+  })();
+</script>
 
 </body>
 </html>
