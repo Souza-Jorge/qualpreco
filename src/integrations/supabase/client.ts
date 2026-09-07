@@ -30,6 +30,12 @@ export const toNumber = (v: string | number | null | undefined): number | null =
   return isNaN(n) ? null : n;
 };
 
+const isBrowser = typeof window !== "undefined";
+
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: { persistSession: false },
+  auth: {
+    persistSession: isBrowser,
+    autoRefreshToken: isBrowser,
+    detectSessionInUrl: false,
+  },
 });
