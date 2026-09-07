@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ScanLine,
@@ -9,9 +9,16 @@ import {
   SearchX,
   RotateCcw,
   Percent,
+  FileText,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase, toNumber, type Produto } from "@/integrations/supabase/client";
+import { toNumber, type Produto } from "@/integrations/supabase/client";
+import {
+  buscarProdutos,
+  getFriendlyError,
+  isNumeric,
+  listarPromocoes,
+} from "@/lib/produtos-busca";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -32,8 +39,6 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const COLUMNS =
-  "codigo, name, barcode, unit, pack, stock_quantity, cost_price, sale_price, category_code, category_name, promo_price, promo_start, promo_end, data_validade";
 
 const HIST_KEY = "consulta_historico_v2";
 
@@ -143,65 +148,8 @@ function Index() {
     });
   };
 
-  const isNumeric = (s: string) => /^\d+$/.test(s.trim());
-
-  const NAME_LIMIT = 100;
-  const NUM_LIMIT = 50;
-
   const reqIdRef = useRef(0);
 
-  // Divide o termo em palavras: todas precisam aparecer no nome (AND)
-  const tokenize = (q: string) => {
-    const parts = q.split(/\s+/).filter(Boolean);
-    const big = parts.filter((p) => p.length > 1);
-    return (big.length > 0 ? big : parts).slice(0, 5);
-  };
-
-  const buscarPorNome = async (q: string) => {
-    let qb = supabase.from("products").select(COLUMNS);
-    if (onlyPromoRef.current) {
-      const todayStr = new Date().toLocaleDateString("en-CA");
-      qb = qb
-        .not("promo_price", "is", null)
-        .or(`promo_end.is.null,promo_end.gte.${todayStr}`);
-    }
-    for (const t of tokenize(q)) qb = qb.ilike("name", `%${t}%`);
-    const { data, error } = await qb.order("name").limit(NAME_LIMIT);
-    if (error) throw error;
-    return (data ?? []) as unknown as Produto[];
-  };
-
-  const listarPromocoes = async () => {
-    const todayStr = new Date().toLocaleDateString("en-CA");
-    const { data, error } = await supabase
-      .from("products")
-      .select(COLUMNS)
-      .not("promo_price", "is", null)
-      .or(`promo_end.is.null,promo_end.gte.${todayStr}`)
-      .order("name")
-      .limit(NAME_LIMIT);
-    if (error) throw error;
-    return (data ?? []) as unknown as Produto[];
-  };
-
-
-  const getFriendlyError = (e: any, context: "search" | "promo") => {
-    const message = String(e?.message ?? e ?? "").toLowerCase();
-
-    if (
-      message.includes("failed to fetch") ||
-      message.includes("network") ||
-      message.includes("fetch") ||
-      message.includes("networkerror") ||
-      !navigator.onLine
-    ) {
-      return "Sem conexão com a internet. Verifique sua conexão e tente novamente.";
-    }
-
-    return context === "promo"
-      ? e?.message ?? "Erro ao listar promoções."
-      : e?.message ?? "Erro ao consultar produtos.";
-  };
 
   const runSearch = async (raw: string) => {
     const q = raw.trim();
@@ -215,79 +163,24 @@ function Index() {
     const stale = () => reqId !== reqIdRef.current;
     setLoading(true);
     try {
-      if (isNumeric(q)) {
-        // Numérico: tenta código exato OU código de barras exato
-        const INT4_MAX = 2147483647;
-        const asInt = Number(q);
-        const fitsInt = Number.isSafeInteger(asInt) && asInt <= INT4_MAX;
-        const filter = fitsInt
-          ? `codigo.eq.${q},barcode.eq.${q}`
-          : `barcode.eq.${q}`;
-        let numQb = supabase
-          .from("products")
-          .select(COLUMNS)
-          .or(filter)
-          .limit(NUM_LIMIT);
-        if (onlyPromoRef.current) {
-          const todayStr = new Date().toLocaleDateString("en-CA");
-          numQb = numQb
-            .not("promo_price", "is", null)
-            .or(`promo_end.is.null,promo_end.gte.${todayStr}`);
-        }
-        const { data, error } = await numQb;
-        if (error) throw error;
-        if (stale()) return;
-        let list = (data ?? []) as unknown as Produto[];
-        if (list.length === 0) {
-          // Sem correspondência exata: busca parcial por nome ou código de barras
-          const [porNome, porBarcode] = await Promise.all([
-            buscarPorNome(q),
-            (async () => {
-              let bqb = supabase
-                .from("products")
-                .select(COLUMNS)
-                .ilike("barcode", `%${q}%`)
-                .limit(NAME_LIMIT);
-              if (onlyPromoRef.current) {
-                const todayStr = new Date().toLocaleDateString("en-CA");
-                bqb = bqb
-                  .not("promo_price", "is", null)
-                  .or(`promo_end.is.null,promo_end.gte.${todayStr}`);
-              }
-              return bqb;
-            })(),
-          ]);
-          if (porBarcode.error) throw porBarcode.error;
-          if (stale()) return;
-          const extras = (porBarcode.data ?? []) as unknown as Produto[];
-          const mapa = new Map<number, Produto>();
-          for (const p of [...porNome, ...extras]) mapa.set(p.codigo, p);
-          list = [...mapa.values()];
-        }
-
-        if (list.length === 1) {
-          setSelected(list[0]);
-          setResults([]);
-          pushHistory(list[0]);
-        } else if (list.length > 1) {
-          setResults(list);
-          setSelected(null);
-        } else {
-          setSelected(null);
-          setResults([]);
-          setError(onlyPromoRef.current
-            ? `Nenhum produto em oferta encontrado com o código "${q}".`
-            : `Nenhum produto encontrado com o código "${q}".`);
-        }
-      } else {
-        const list = await buscarPorNome(q);
-        if (stale()) return;
+      const list = await buscarProdutos(q, { onlyPromo: onlyPromoRef.current });
+      if (stale()) return;
+      if (list.length === 1) {
+        setSelected(list[0]);
+        setResults([]);
+        pushHistory(list[0]);
+      } else if (list.length > 1) {
         setResults(list);
-        setSelected(list.length === 1 ? list[0] : null);
-        if (list.length === 1) pushHistory(list[0]);
-        if (list.length === 0) setError(onlyPromoRef.current
-          ? `Nenhum produto em oferta encontrado para "${q}".`
-          : `Nenhum produto encontrado para "${q}".`);
+        setSelected(null);
+      } else {
+        setSelected(null);
+        setResults([]);
+        const alvo = isNumeric(q) ? `com o código "${q}"` : `para "${q}"`;
+        setError(
+          onlyPromoRef.current
+            ? `Nenhum produto em oferta encontrado ${alvo}.`
+            : `Nenhum produto encontrado ${alvo}.`
+        );
       }
     } catch (e: any) {
       if (stale()) return;
@@ -443,19 +336,28 @@ function Index() {
             </div>
           </form>
 
-          <button
-            type="button"
-            onClick={togglePromo}
-            className={`mt-2 flex h-10 w-full items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors ${
-              onlyPromo
-                ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 ring-1 ring-primary-foreground/30"
-            }`}
-            aria-pressed={onlyPromo}
-          >
-            <Percent className="h-4 w-4" />
-            Apenas ofertas
-          </button>
+          <div className="mt-2 flex gap-2">
+            <button
+              type="button"
+              onClick={togglePromo}
+              className={`flex h-10 flex-1 items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors ${
+                onlyPromo
+                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 ring-1 ring-primary-foreground/30"
+              }`}
+              aria-pressed={onlyPromo}
+            >
+              <Percent className="h-4 w-4" />
+              Apenas ofertas
+            </button>
+            <Link
+              to="/orcamentos/novo"
+              className="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-primary-foreground/10 text-sm font-semibold text-primary-foreground ring-1 ring-primary-foreground/30 transition-colors hover:bg-primary-foreground/20"
+            >
+              <FileText className="h-4 w-4" />
+              Orçamentos
+            </Link>
+          </div>
         </header>
       </div>
 
