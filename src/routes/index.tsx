@@ -12,7 +12,7 @@ import {
   FileText,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase, toNumber, type Produto } from "@/integrations/supabase/client";
+import { toNumber, type Produto } from "@/integrations/supabase/client";
 import {
   buscarProdutos,
   getFriendlyError,
