@@ -28,6 +28,7 @@ export type OrcamentoItem = {
   produto_nome: string | null;
   ean: string | null;
   quantidade: number;
+  quantidade_por_caixa: number | null;
   preco_unitario: number;
   subtotal: number;
 };
@@ -40,8 +41,10 @@ export type ItemLocal = {
   produto_nome: string;
   ean: string | null;
   quantidade: number;
+  quantidade_por_caixa: number | null;
   preco_unitario: number;
 };
+
 
 export type ClienteForm = {
   cliente_nome: string;
@@ -93,9 +96,11 @@ const itensPayload = (orcamentoId: string, itens: ItemLocal[]) =>
     produto_nome: i.produto_nome,
     ean: i.ean,
     quantidade: i.quantidade,
+    quantidade_por_caixa: i.quantidade_por_caixa,
     preco_unitario: i.preco_unitario,
     subtotal: subtotalItem(i),
   }));
+
 
 export async function criarOrcamento(
   userId: string,
@@ -187,8 +192,11 @@ export async function carregarOrcamento(id: string) {
       produto_nome: i.produto_nome ?? "",
       ean: i.ean,
       quantidade: Number(i.quantidade),
+      quantidade_por_caixa:
+        i.quantidade_por_caixa != null ? Number(i.quantidade_por_caixa) : null,
       preco_unitario: Number(i.preco_unitario),
     })
+
   );
   return { orcamento: orc, itens: lista };
 }
@@ -226,6 +234,27 @@ export async function mudarStatus(
     .eq("id", id);
   if (error) throw error;
 }
+
+// Quantidade comercial: "600 UN | 50 CX" ou "625 UN | 52 CX + 1 UN"
+const numUn = (n: number) =>
+  Number.isInteger(n) ? String(n) : String(n).replace(".", ",");
+
+export const fmtQuantidade = (
+  quantidade: number,
+  quantidadePorCaixa: number | null | undefined
+) => {
+  const q = Number(quantidade || 0);
+  const base = `${numUn(q)} UN`;
+  const pack = Number(quantidadePorCaixa || 0);
+  if (!pack || pack <= 0 || !Number.isInteger(q)) return base;
+  const caixas = Math.floor(q / pack);
+  const resto = q - caixas * pack;
+  if (caixas <= 0) return base;
+  return resto > 0
+    ? `${base} | ${caixas} CX + ${numUn(resto)} UN`
+    : `${base} | ${caixas} CX`;
+};
+
 
 export const fmtData = (iso: string) => {
   const d = new Date(iso);

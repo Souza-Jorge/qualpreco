@@ -1,7 +1,14 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import logoUrl from "@/assets/logo-xapadao.png";
-import { fmtData, fmtNumero, type ItemLocal, type Orcamento } from "@/lib/orcamentos";
+import {
+  fmtData,
+  fmtNumero,
+  fmtQuantidade,
+  type ItemLocal,
+  type Orcamento,
+} from "@/lib/orcamentos";
+
 
 const EMPRESA = "XAPADÃO BEBIDAS";
 
@@ -12,10 +19,8 @@ const brl = (n: number) =>
     .replace(".", ",")
     .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
-const qtd = (n: number) => {
-  const v = Number(n || 0);
-  return Number.isInteger(v) ? String(v) : v.toFixed(3).replace(".", ",");
-};
+
+
 
 async function carregarLogo(): Promise<string | null> {
   try {
@@ -130,10 +135,11 @@ export async function gerarOrcamentoPdf(
   const corpo = itens.map((i) => [
     i.codigo ?? "",
     i.produto_nome + (i.ean ? `\nEAN: ${i.ean}` : ""),
-    qtd(i.quantidade),
+    fmtQuantidade(i.quantidade, i.quantidade_por_caixa).replace(" | ", "\n"),
     brl(i.preco_unitario),
     brl(Math.round((i.quantidade * i.preco_unitario + Number.EPSILON) * 100) / 100),
   ]);
+
 
   autoTable(doc, {
     startY: y,
@@ -150,7 +156,7 @@ export async function gerarOrcamentoPdf(
     alternateRowStyles: { fillColor: [246, 246, 247] },
     columnStyles: {
       0: { cellWidth: 22 },
-      2: { cellWidth: 16, halign: "right" },
+      2: { cellWidth: 30, halign: "right" },
       3: { cellWidth: 26, halign: "right" },
       4: { cellWidth: 28, halign: "right" },
     },

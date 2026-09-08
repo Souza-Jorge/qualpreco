@@ -10,6 +10,7 @@ import {
   Trash2,
   User,
 } from "lucide-react";
+import { toast } from "sonner";
 import type { Produto } from "@/integrations/supabase/client";
 import { fmtBRL, precoVigente } from "@/lib/produtos-busca";
 import {
@@ -18,11 +19,13 @@ import {
   carregarOrcamento,
   clienteVazio,
   criarOrcamento,
+  fmtQuantidade,
   subtotalItem,
   type ClienteForm,
   type ItemLocal,
   type OrcamentoStatus,
 } from "@/lib/orcamentos";
+
 import { BuscaProdutos } from "@/components/BuscaProdutos";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -94,6 +97,9 @@ export function OrcamentoEditor({
 
   const addProduto = (p: Produto) => {
     const { precoFinal } = precoVigente(p);
+    const packBruto = Number((p as any).pack);
+    const pack =
+      Number.isFinite(packBruto) && packBruto > 1 ? Math.round(packBruto) : null;
     setOk(false);
     setItens((prev) => {
       const existente = prev.find((i) => i.product_id === p.codigo);
@@ -111,6 +117,7 @@ export function OrcamentoEditor({
           produto_nome: p.name,
           ean: p.barcode,
           quantidade: 1,
+          quantidade_por_caixa: pack,
           preco_unitario: precoFinal ?? 0,
         },
       ];
@@ -124,10 +131,23 @@ export function OrcamentoEditor({
     );
   };
 
+  const setPack = (key: string, v: string) => {
+    const n = parseInt(v.replace(/\D/g, ""), 10);
+    setOk(false);
+    setItens((prev) =>
+      prev.map((i) =>
+        i.key === key
+          ? { ...i, quantidade_por_caixa: !isNaN(n) && n > 0 ? n : null }
+          : i
+      )
+    );
+  };
+
   const remover = (key: string) => {
     setOk(false);
     setItens((prev) => prev.filter((i) => i.key !== key));
   };
+
 
   const salvar = async () => {
     if (bloqueado || salvando) return;
@@ -136,17 +156,19 @@ export function OrcamentoEditor({
     try {
       if (orcamentoId) {
         await atualizarOrcamento(orcamentoId, cliente, itens, totais.desconto);
-        setOk(true);
       } else {
-        const novo = await criarOrcamento(userId, cliente, itens, totais.desconto);
-        navigate({ to: "/orcamentos/$id", params: { id: novo.id }, replace: true });
+        await criarOrcamento(userId, cliente, itens, totais.desconto);
       }
+      setOk(true);
+      toast.success("Orçamento salvo com sucesso.");
+      navigate({ to: "/orcamentos", replace: true });
     } catch (e: any) {
       setErro(e?.message ?? "Não foi possível salvar o orçamento.");
     } finally {
       setSalvando(false);
     }
   };
+
 
   if (carregando) {
     return (
@@ -299,7 +321,26 @@ export function OrcamentoEditor({
                     {fmtBRL(subtotalItem(i))}
                   </span>
                 </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className="text-xs text-muted-foreground" htmlFor={`cx-${i.key}`}>
+                    Qtde por caixa
+                  </label>
+                  <Input
+                    id={`cx-${i.key}`}
+                    value={i.quantidade_por_caixa ?? ""}
+                    disabled={bloqueado}
+                    inputMode="numeric"
+                    placeholder="—"
+                    onChange={(e) => setPack(i.key, e.target.value)}
+                    className="h-10 w-20 text-center text-base"
+                  />
+                  <span className="text-xs text-muted-foreground">UN/CX</span>
+                  <span className="ml-auto text-xs font-medium">
+                    {fmtQuantidade(i.quantidade, i.quantidade_por_caixa)}
+                  </span>
+                </div>
               </div>
+
             ))}
           </Card>
         )}
