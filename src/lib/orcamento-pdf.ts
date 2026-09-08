@@ -156,7 +156,7 @@ export async function gerarOrcamentoPdf(
     alternateRowStyles: { fillColor: [246, 246, 247] },
     columnStyles: {
       0: { cellWidth: 22 },
-      2: { cellWidth: 16, halign: "right" },
+      2: { cellWidth: 30, halign: "right" },
       3: { cellWidth: 26, halign: "right" },
       4: { cellWidth: 28, halign: "right" },
     },
