@@ -90,7 +90,7 @@ export function OrcamentoEditor({
 
   const totais = useMemo(() => calcTotais(itens, desconto), [itens, desconto]);
 
-  const bloqueado = status === "Cancelado";
+  const bloqueado = status !== "Rascunho";
 
   const addProduto = (p: Produto) => {
     const { precoFinal } = precoVigente(p);
