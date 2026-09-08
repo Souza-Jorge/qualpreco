@@ -96,9 +96,11 @@ const itensPayload = (orcamentoId: string, itens: ItemLocal[]) =>
     produto_nome: i.produto_nome,
     ean: i.ean,
     quantidade: i.quantidade,
+    quantidade_por_caixa: i.quantidade_por_caixa,
     preco_unitario: i.preco_unitario,
     subtotal: subtotalItem(i),
   }));
+
 
 export async function criarOrcamento(
   userId: string,
@@ -190,8 +192,11 @@ export async function carregarOrcamento(id: string) {
       produto_nome: i.produto_nome ?? "",
       ean: i.ean,
       quantidade: Number(i.quantidade),
+      quantidade_por_caixa:
+        i.quantidade_por_caixa != null ? Number(i.quantidade_por_caixa) : null,
       preco_unitario: Number(i.preco_unitario),
     })
+
   );
   return { orcamento: orc, itens: lista };
 }
