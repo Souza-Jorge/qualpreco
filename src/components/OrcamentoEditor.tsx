@@ -4,8 +4,6 @@ import {
   ArrowLeft,
   Check,
   Loader2,
-  Minus,
-  Plus,
   Save,
   Trash2,
   User,
