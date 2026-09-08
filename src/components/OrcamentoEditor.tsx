@@ -4,8 +4,6 @@ import {
   ArrowLeft,
   Check,
   Loader2,
-  Minus,
-  Plus,
   Save,
   Trash2,
   User,
@@ -21,6 +19,7 @@ import {
   criarOrcamento,
   fmtQuantidade,
   subtotalItem,
+  totalUnidades,
   type ClienteForm,
   type ItemLocal,
   type OrcamentoStatus,
@@ -105,7 +104,17 @@ export function OrcamentoEditor({
       const existente = prev.find((i) => i.product_id === p.codigo);
       if (existente) {
         return prev.map((i) =>
-          i.key === existente.key ? { ...i, quantidade: i.quantidade + 1 } : i
+          i.key === existente.key
+            ? {
+                ...i,
+                unidades: i.unidades + 1,
+                quantidade: totalUnidades(
+                  i.caixas,
+                  i.unidades + 1,
+                  i.quantidade_por_caixa
+                ),
+              }
+            : i
         );
       }
       return [
@@ -118,28 +127,31 @@ export function OrcamentoEditor({
           ean: p.barcode,
           quantidade: 1,
           quantidade_por_caixa: pack,
+          caixas: 0,
+          unidades: 1,
           preco_unitario: precoFinal ?? 0,
         },
       ];
     });
   };
 
-  const setQtd = (key: string, q: number) => {
-    setOk(false);
-    setItens((prev) =>
-      prev.map((i) => (i.key === key ? { ...i, quantidade: Math.max(q, 1) } : i))
-    );
-  };
-
-  const setPack = (key: string, v: string) => {
+  const setQtdCampo = (key: string, campo: "caixas" | "unidades", v: string) => {
     const n = parseInt(v.replace(/\D/g, ""), 10);
+    const valor = !isNaN(n) && n > 0 ? n : 0;
     setOk(false);
     setItens((prev) =>
-      prev.map((i) =>
-        i.key === key
-          ? { ...i, quantidade_por_caixa: !isNaN(n) && n > 0 ? n : null }
-          : i
-      )
+      prev.map((i) => {
+        if (i.key !== key) return i;
+        const atualizado = { ...i, [campo]: valor } as typeof i;
+        return {
+          ...atualizado,
+          quantidade: totalUnidades(
+            atualizado.caixas,
+            atualizado.unidades,
+            atualizado.quantidade_por_caixa
+          ),
+        };
+      })
     );
   };
 
@@ -266,6 +278,9 @@ export function OrcamentoEditor({
                     <div className="text-[11px] text-muted-foreground">
                       #{i.codigo}
                       {i.ean ? ` · ${i.ean}` : ""}
+                      {i.quantidade_por_caixa
+                        ? ` · Pack: ${i.quantidade_por_caixa} UN/CX`
+                        : ""}
                     </div>
                   </div>
                   <button
@@ -278,66 +293,60 @@ export function OrcamentoEditor({
                     <Trash2 className="h-5 w-5" />
                   </button>
                 </div>
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      className="h-11 w-11"
-                      disabled={bloqueado || i.quantidade <= 1}
-                      onClick={() => setQtd(i.key, i.quantidade - 1)}
-                      aria-label="Diminuir quantidade"
-                    >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    <Input
-                      value={String(i.quantidade)}
-                      disabled={bloqueado}
-                      inputMode="decimal"
-                      onChange={(e) => {
-                        const n = parseFloat(e.target.value.replace(",", "."));
-                        setQtd(i.key, isNaN(n) ? 1 : n);
-                      }}
-                      className="h-11 w-16 text-center text-base"
-                      aria-label="Quantidade"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      className="h-11 w-11"
-                      disabled={bloqueado}
-                      onClick={() => setQtd(i.key, i.quantidade + 1)}
-                      aria-label="Aumentar quantidade"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      × {fmtBRL(i.preco_unitario)}
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {i.quantidade_por_caixa ? (
+                      <div className="flex items-center gap-1">
+                        <label
+                          className="text-xs font-medium text-muted-foreground"
+                          htmlFor={`cx-${i.key}`}
+                        >
+                          CX
+                        </label>
+                        <Input
+                          id={`cx-${i.key}`}
+                          value={i.caixas ? String(i.caixas) : ""}
+                          disabled={bloqueado}
+                          inputMode="numeric"
+                          placeholder="0"
+                          onChange={(e) =>
+                            setQtdCampo(i.key, "caixas", e.target.value)
+                          }
+                          className="h-11 w-16 text-center text-base"
+                          aria-label="Caixas"
+                        />
+                      </div>
+                    ) : null}
+                    <div className="flex items-center gap-1">
+                      <label
+                        className="text-xs font-medium text-muted-foreground"
+                        htmlFor={`un-${i.key}`}
+                      >
+                        UN
+                      </label>
+                      <Input
+                        id={`un-${i.key}`}
+                        value={i.unidades ? String(i.unidades) : ""}
+                        disabled={bloqueado}
+                        inputMode="numeric"
+                        placeholder="0"
+                        onChange={(e) =>
+                          setQtdCampo(i.key, "unidades", e.target.value)
+                        }
+                        className="h-11 w-16 text-center text-base"
+                        aria-label="Unidades"
+                      />
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      × {fmtBRL(i.preco_unitario)} / UN
                     </span>
                   </div>
                   <span className="text-base font-bold text-primary">
                     {fmtBRL(subtotalItem(i))}
                   </span>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <label className="text-xs text-muted-foreground" htmlFor={`cx-${i.key}`}>
-                    Qtde por caixa
-                  </label>
-                  <Input
-                    id={`cx-${i.key}`}
-                    value={i.quantidade_por_caixa ?? ""}
-                    disabled={bloqueado}
-                    inputMode="numeric"
-                    placeholder="—"
-                    onChange={(e) => setPack(i.key, e.target.value)}
-                    className="h-10 w-20 text-center text-base"
-                  />
-                  <span className="text-xs text-muted-foreground">UN/CX</span>
-                  <span className="ml-auto text-xs font-medium">
-                    {fmtQuantidade(i.quantidade, i.quantidade_por_caixa)}
-                  </span>
+                <div className="text-xs font-medium text-muted-foreground">
+                  {fmtQuantidade(i.quantidade, i.quantidade_por_caixa)}
                 </div>
               </div>
 

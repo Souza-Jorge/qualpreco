@@ -42,7 +42,21 @@ export type ItemLocal = {
   ean: string | null;
   quantidade: number;
   quantidade_por_caixa: number | null;
+  caixas: number;
+  unidades: number;
   preco_unitario: number;
+};
+
+// Quantidade total em unidades a partir de caixas + unidades avulsas
+export const totalUnidades = (
+  caixas: number,
+  unidades: number,
+  pack: number | null | undefined
+) => {
+  const p = Number(pack || 0);
+  const cx = Math.max(Math.floor(Number(caixas) || 0), 0);
+  const un = Math.max(Number(unidades) || 0, 0);
+  return (p > 0 ? cx * p : 0) + un;
 };
 
 
@@ -185,18 +199,24 @@ export async function carregarOrcamento(id: string) {
 
   const orc = data as unknown as Orcamento;
   const lista: ItemLocal[] = ((itens ?? []) as unknown as OrcamentoItem[]).map(
-    (i, idx) => ({
-      key: i.id ?? `i${idx}`,
-      product_id: i.product_id,
-      codigo: i.codigo,
-      produto_nome: i.produto_nome ?? "",
-      ean: i.ean,
-      quantidade: Number(i.quantidade),
-      quantidade_por_caixa:
-        i.quantidade_por_caixa != null ? Number(i.quantidade_por_caixa) : null,
-      preco_unitario: Number(i.preco_unitario),
-    })
-
+    (i, idx) => {
+      const q = Number(i.quantidade);
+      const pack =
+        i.quantidade_por_caixa != null ? Number(i.quantidade_por_caixa) : null;
+      const usaCx = !!pack && pack > 0 && Number.isInteger(q);
+      return {
+        key: i.id ?? `i${idx}`,
+        product_id: i.product_id,
+        codigo: i.codigo,
+        produto_nome: i.produto_nome ?? "",
+        ean: i.ean,
+        quantidade: q,
+        quantidade_por_caixa: pack,
+        caixas: usaCx ? Math.floor(q / (pack as number)) : 0,
+        unidades: usaCx ? q - Math.floor(q / (pack as number)) * (pack as number) : q,
+        preco_unitario: Number(i.preco_unitario),
+      };
+    }
   );
   return { orcamento: orc, itens: lista };
 }
