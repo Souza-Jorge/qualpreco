@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Ban, CheckCircle2, FileDown, Loader2, Pencil } from "lucide-react";
+import { Ban, CheckCircle2, FileDown, Loader2, Pencil, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { AuthGate } from "@/components/AuthGate";
 import { OrcamentoHeader } from "@/components/OrcamentoEditor";
@@ -56,10 +56,12 @@ function Detalhe({ id }: { id: string }) {
   const [acao, setAcao] = useState<"Finalizado" | "Cancelado" | null>(null);
   const [salvando, setSalvando] = useState(false);
   const [gerandoPdf, setGerandoPdf] = useState(false);
+  const [compartilhando, setCompartilhando] = useState(false);
 
   const gerarPdf = async () => {
-    if (!orc || gerandoPdf) return;
+    if (!orc || gerandoPdf || compartilhando) return;
     setGerandoPdf(true);
+    const aviso = toast.loading("Gerando PDF...");
     try {
       const [{ gerarOrcamentoPdf }, { salvarPdf }] = await Promise.all([
         import("@/lib/orcamento-pdf"),
@@ -70,12 +72,40 @@ function Detalhe({ id }: { id: string }) {
       toast.success(
         r.destino === "download"
           ? `PDF gerado: ${filename}`
-          : `PDF salvo em Documentos: ${filename}`
+          : `PDF salvo em Documentos: ${filename}`,
+        { id: aviso }
       );
-    } catch (e: any) {
-      toast.error(e?.message ?? "Não foi possível gerar o PDF.");
+    } catch {
+      toast.error("Não foi possível gerar o PDF. Tente novamente.", { id: aviso });
     } finally {
       setGerandoPdf(false);
+    }
+  };
+
+  const compartilharPdfOrc = async () => {
+    if (!orc || gerandoPdf || compartilhando) return;
+    setCompartilhando(true);
+    const aviso = toast.loading("Preparando arquivo...");
+    try {
+      const [{ gerarOrcamentoPdf }, { compartilharPdf }] = await Promise.all([
+        import("@/lib/orcamento-pdf"),
+        import("@/lib/compartilhar-pdf"),
+      ]);
+      const { doc, filename } = await gerarOrcamentoPdf(orc, itens);
+      const r = await compartilharPdf(doc, filename, `Orçamento ${fmtNumero(orc.numero)}`);
+      if (r === "baixado") {
+        toast.success("Arquivo baixado. Compartilhe manualmente.", { id: aviso });
+      } else if (r === "cancelado") {
+        toast.dismiss(aviso);
+      } else {
+        toast.success("Pronto para compartilhar.", { id: aviso });
+      }
+    } catch {
+      toast.error("Não foi possível compartilhar o PDF. Tente gerar o PDF novamente.", {
+        id: aviso,
+      });
+    } finally {
+      setCompartilhando(false);
     }
   };
 
@@ -212,19 +242,33 @@ function Detalhe({ id }: { id: string }) {
         )}
       </Card>
 
-      <Button
-        variant="outline"
-        className="h-14 w-full gap-2 text-base font-semibold"
-        onClick={gerarPdf}
-        disabled={gerandoPdf}
-      >
-        {gerandoPdf ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
-        ) : (
-          <FileDown className="h-5 w-5" />
-        )}
-        Gerar PDF
-      </Button>
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          className="h-14 flex-1 gap-2 text-base font-semibold"
+          onClick={gerarPdf}
+          disabled={gerandoPdf || compartilhando}
+        >
+          {gerandoPdf ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <FileDown className="h-5 w-5" />
+          )}
+          Gerar PDF
+        </Button>
+        <Button
+          className="h-14 flex-1 gap-2 text-base font-semibold"
+          onClick={compartilharPdfOrc}
+          disabled={gerandoPdf || compartilhando}
+        >
+          {compartilhando ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <Share2 className="h-5 w-5" />
+          )}
+          Compartilhar PDF
+        </Button>
+      </div>
 
       {acao && (
         <Card className="space-y-3 border-primary/40 p-4">
