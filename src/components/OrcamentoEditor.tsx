@@ -10,6 +10,7 @@ import {
   Trash2,
   User,
 } from "lucide-react";
+import { toast } from "sonner";
 import type { Produto } from "@/integrations/supabase/client";
 import { fmtBRL, precoVigente } from "@/lib/produtos-busca";
 import {
@@ -18,11 +19,13 @@ import {
   carregarOrcamento,
   clienteVazio,
   criarOrcamento,
+  fmtQuantidade,
   subtotalItem,
   type ClienteForm,
   type ItemLocal,
   type OrcamentoStatus,
 } from "@/lib/orcamentos";
+
 import { BuscaProdutos } from "@/components/BuscaProdutos";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
