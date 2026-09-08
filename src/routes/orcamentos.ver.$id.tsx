@@ -242,19 +242,33 @@ function Detalhe({ id }: { id: string }) {
         )}
       </Card>
 
-      <Button
-        variant="outline"
-        className="h-14 w-full gap-2 text-base font-semibold"
-        onClick={gerarPdf}
-        disabled={gerandoPdf}
-      >
-        {gerandoPdf ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
-        ) : (
-          <FileDown className="h-5 w-5" />
-        )}
-        Gerar PDF
-      </Button>
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          className="h-14 flex-1 gap-2 text-base font-semibold"
+          onClick={gerarPdf}
+          disabled={gerandoPdf || compartilhando}
+        >
+          {gerandoPdf ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <FileDown className="h-5 w-5" />
+          )}
+          Gerar PDF
+        </Button>
+        <Button
+          className="h-14 flex-1 gap-2 text-base font-semibold"
+          onClick={compartilharPdfOrc}
+          disabled={gerandoPdf || compartilhando}
+        >
+          {compartilhando ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <Share2 className="h-5 w-5" />
+          )}
+          Compartilhar PDF
+        </Button>
+      </div>
 
       {acao && (
         <Card className="space-y-3 border-primary/40 p-4">
