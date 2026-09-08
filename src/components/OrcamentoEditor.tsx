@@ -160,7 +160,7 @@ export function OrcamentoEditor({
     <div className="space-y-4 pb-28">
       {bloqueado && (
         <Card className="border-destructive/40 p-3 text-sm text-destructive">
-          Este orçamento está cancelado e não pode ser editado.
+          Este orçamento está {status.toLowerCase()} e não pode mais ser editado.
         </Card>
       )}
 
