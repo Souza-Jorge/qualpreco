@@ -19,10 +19,8 @@ const brl = (n: number) =>
     .replace(".", ",")
     .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
-const qtd = (n: number) => {
-  const v = Number(n || 0);
-  return Number.isInteger(v) ? String(v) : v.toFixed(3).replace(".", ",");
-};
+
+
 
 async function carregarLogo(): Promise<string | null> {
   try {
