@@ -21,13 +21,13 @@ async function carregarLogo(): Promise<string | null> {
   try {
     const resp = await fetch(logoUrl);
     if (!resp.ok) return null;
-    const blob = await resp.blob();
-    return await new Promise<string>((resolve, reject) => {
-      const fr = new FileReader();
-      fr.onload = () => resolve(String(fr.result));
-      fr.onerror = () => reject(fr.error);
-      fr.readAsDataURL(blob);
-    });
+    const bytes = new Uint8Array(await resp.arrayBuffer());
+    let bin = "";
+    const passo = 0x8000;
+    for (let i = 0; i < bytes.length; i += passo) {
+      bin += String.fromCharCode(...bytes.subarray(i, i + passo));
+    }
+    return "data:image/png;base64," + btoa(bin);
   } catch {
     return null;
   }
