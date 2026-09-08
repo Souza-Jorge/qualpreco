@@ -28,6 +28,7 @@ export type OrcamentoItem = {
   produto_nome: string | null;
   ean: string | null;
   quantidade: number;
+  quantidade_por_caixa: number | null;
   preco_unitario: number;
   subtotal: number;
 };
@@ -40,8 +41,10 @@ export type ItemLocal = {
   produto_nome: string;
   ean: string | null;
   quantidade: number;
+  quantidade_por_caixa: number | null;
   preco_unitario: number;
 };
+
 
 export type ClienteForm = {
   cliente_nome: string;
