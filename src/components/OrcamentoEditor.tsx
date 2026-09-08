@@ -153,17 +153,19 @@ export function OrcamentoEditor({
     try {
       if (orcamentoId) {
         await atualizarOrcamento(orcamentoId, cliente, itens, totais.desconto);
-        setOk(true);
       } else {
-        const novo = await criarOrcamento(userId, cliente, itens, totais.desconto);
-        navigate({ to: "/orcamentos/$id", params: { id: novo.id }, replace: true });
+        await criarOrcamento(userId, cliente, itens, totais.desconto);
       }
+      setOk(true);
+      toast.success("Orçamento salvo com sucesso.");
+      navigate({ to: "/orcamentos", replace: true });
     } catch (e: any) {
       setErro(e?.message ?? "Não foi possível salvar o orçamento.");
     } finally {
       setSalvando(false);
     }
   };
+
 
   if (carregando) {
     return (
