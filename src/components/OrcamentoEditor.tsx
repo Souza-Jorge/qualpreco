@@ -21,6 +21,7 @@ import {
   criarOrcamento,
   fmtQuantidade,
   subtotalItem,
+  totalUnidades,
   type ClienteForm,
   type ItemLocal,
   type OrcamentoStatus,
