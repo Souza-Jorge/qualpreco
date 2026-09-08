@@ -321,7 +321,26 @@ export function OrcamentoEditor({
                     {fmtBRL(subtotalItem(i))}
                   </span>
                 </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className="text-xs text-muted-foreground" htmlFor={`cx-${i.key}`}>
+                    Qtde por caixa
+                  </label>
+                  <Input
+                    id={`cx-${i.key}`}
+                    value={i.quantidade_por_caixa ?? ""}
+                    disabled={bloqueado}
+                    inputMode="numeric"
+                    placeholder="—"
+                    onChange={(e) => setPack(i.key, e.target.value)}
+                    className="h-10 w-20 text-center text-base"
+                  />
+                  <span className="text-xs text-muted-foreground">UN/CX</span>
+                  <span className="ml-auto text-xs font-medium">
+                    {fmtQuantidade(i.quantidade, i.quantidade_por_caixa)}
+                  </span>
+                </div>
               </div>
+
             ))}
           </Card>
         )}
