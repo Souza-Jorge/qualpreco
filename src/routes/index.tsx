@@ -351,7 +351,7 @@ function Index() {
               Apenas ofertas
             </button>
             <Link
-              to="/orcamentos/novo"
+              to="/orcamentos"
               className="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-primary-foreground/10 text-sm font-semibold text-primary-foreground ring-1 ring-primary-foreground/30 transition-colors hover:bg-primary-foreground/20"
             >
               <FileText className="h-4 w-4" />

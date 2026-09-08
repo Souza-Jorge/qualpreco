@@ -203,3 +203,34 @@ export async function listarRascunhos(userId: string): Promise<Orcamento[]> {
   if (error) throw error;
   return (data ?? []) as unknown as Orcamento[];
 }
+
+// Fase 3 — histórico
+export async function listarOrcamentos(userId: string): Promise<Orcamento[]> {
+  const { data, error } = await supabase
+    .from("orcamentos")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(300);
+  if (error) throw error;
+  return (data ?? []) as unknown as Orcamento[];
+}
+
+export async function mudarStatus(
+  id: string,
+  status: Exclude<OrcamentoStatus, "Rascunho">
+): Promise<void> {
+  const { error } = await supabase
+    .from("orcamentos")
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) throw error;
+}
+
+export const fmtData = (iso: string) => {
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? "" : d.toLocaleDateString("pt-BR");
+};
+
+export const fmtNumero = (n: number) => `#${String(n).padStart(6, "0")}`;
+

@@ -10,12 +10,19 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OrcamentosIndexRouteImport } from './routes/orcamentos.index'
 import { Route as OrcamentosIdRouteImport } from './routes/orcamentos.$id'
 import { Route as OrcamentosNovoRouteImport } from './routes/orcamentos.novo'
+import { Route as OrcamentosVerIdRouteImport } from './routes/orcamentos.ver.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrcamentosIndexRoute = OrcamentosIndexRouteImport.update({
+  id: '/orcamentos/',
+  path: '/orcamentos/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrcamentosIdRoute = OrcamentosIdRouteImport.update({
@@ -28,35 +35,64 @@ const OrcamentosNovoRoute = OrcamentosNovoRouteImport.update({
   path: '/orcamentos/novo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OrcamentosVerIdRoute = OrcamentosVerIdRouteImport.update({
+  id: '/orcamentos/ver/$id',
+  path: '/orcamentos/ver/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/orcamentos/$id': typeof OrcamentosIdRoute
   '/orcamentos/novo': typeof OrcamentosNovoRoute
+  '/orcamentos/': typeof OrcamentosIndexRoute
+  '/orcamentos/ver/$id': typeof OrcamentosVerIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/orcamentos/$id': typeof OrcamentosIdRoute
   '/orcamentos/novo': typeof OrcamentosNovoRoute
+  '/orcamentos': typeof OrcamentosIndexRoute
+  '/orcamentos/ver/$id': typeof OrcamentosVerIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/orcamentos/$id': typeof OrcamentosIdRoute
   '/orcamentos/novo': typeof OrcamentosNovoRoute
+  '/orcamentos/': typeof OrcamentosIndexRoute
+  '/orcamentos/ver/$id': typeof OrcamentosVerIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/orcamentos/$id' | '/orcamentos/novo'
+  fullPaths:
+    | '/'
+    | '/orcamentos/$id'
+    | '/orcamentos/novo'
+    | '/orcamentos/'
+    | '/orcamentos/ver/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/orcamentos/$id' | '/orcamentos/novo'
-  id: '__root__' | '/' | '/orcamentos/$id' | '/orcamentos/novo'
+  to:
+    | '/'
+    | '/orcamentos/$id'
+    | '/orcamentos/novo'
+    | '/orcamentos'
+    | '/orcamentos/ver/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/orcamentos/$id'
+    | '/orcamentos/novo'
+    | '/orcamentos/'
+    | '/orcamentos/ver/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   OrcamentosIdRoute: typeof OrcamentosIdRoute
   OrcamentosNovoRoute: typeof OrcamentosNovoRoute
+  OrcamentosIndexRoute: typeof OrcamentosIndexRoute
+  OrcamentosVerIdRoute: typeof OrcamentosVerIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -66,6 +102,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orcamentos/': {
+      id: '/orcamentos/'
+      path: '/orcamentos'
+      fullPath: '/orcamentos/'
+      preLoaderRoute: typeof OrcamentosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/orcamentos/$id': {
@@ -82,6 +125,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrcamentosNovoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/orcamentos/ver/$id': {
+      id: '/orcamentos/ver/$id'
+      path: '/orcamentos/ver/$id'
+      fullPath: '/orcamentos/ver/$id'
+      preLoaderRoute: typeof OrcamentosVerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +139,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   OrcamentosIdRoute: OrcamentosIdRoute,
   OrcamentosNovoRoute: OrcamentosNovoRoute,
+  OrcamentosIndexRoute: OrcamentosIndexRoute,
+  OrcamentosVerIdRoute: OrcamentosVerIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
