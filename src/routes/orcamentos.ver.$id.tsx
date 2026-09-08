@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Ban, CheckCircle2, Loader2, Pencil } from "lucide-react";
+import { Ban, CheckCircle2, FileDown, Loader2, Pencil } from "lucide-react";
+import { toast } from "sonner";
 import { AuthGate } from "@/components/AuthGate";
 import { OrcamentoHeader } from "@/components/OrcamentoEditor";
 import {
@@ -54,6 +55,29 @@ function Detalhe({ id }: { id: string }) {
   const [erro, setErro] = useState<string | null>(null);
   const [acao, setAcao] = useState<"Finalizado" | "Cancelado" | null>(null);
   const [salvando, setSalvando] = useState(false);
+  const [gerandoPdf, setGerandoPdf] = useState(false);
+
+  const gerarPdf = async () => {
+    if (!orc || gerandoPdf) return;
+    setGerandoPdf(true);
+    try {
+      const [{ gerarOrcamentoPdf }, { salvarPdf }] = await Promise.all([
+        import("@/lib/orcamento-pdf"),
+        import("@/lib/salvar-arquivo"),
+      ]);
+      const { doc, filename } = await gerarOrcamentoPdf(orc, itens);
+      const r = await salvarPdf(doc, filename);
+      toast.success(
+        r.destino === "download"
+          ? `PDF gerado: ${filename}`
+          : `PDF salvo em Documentos: ${filename}`
+      );
+    } catch (e: any) {
+      toast.error(e?.message ?? "Não foi possível gerar o PDF.");
+    } finally {
+      setGerandoPdf(false);
+    }
+  };
 
   useEffect(() => {
     let ativo = true;
