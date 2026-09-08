@@ -130,10 +130,11 @@ export async function gerarOrcamentoPdf(
   const corpo = itens.map((i) => [
     i.codigo ?? "",
     i.produto_nome + (i.ean ? `\nEAN: ${i.ean}` : ""),
-    qtd(i.quantidade),
+    fmtQuantidade(i.quantidade, i.quantidade_por_caixa).replace(" | ", "\n"),
     brl(i.preco_unitario),
     brl(Math.round((i.quantidade * i.preco_unitario + Number.EPSILON) * 100) / 100),
   ]);
+
 
   autoTable(doc, {
     startY: y,

@@ -8,11 +8,13 @@ import {
   carregarOrcamento,
   fmtData,
   fmtNumero,
+  fmtQuantidade,
   mudarStatus,
   subtotalItem,
   type ItemLocal,
   type Orcamento,
 } from "@/lib/orcamentos";
+
 import { fmtBRL } from "@/lib/produtos-busca";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -212,10 +214,12 @@ function Detalhe({ id }: { id: string }) {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">
-                    {i.quantidade} × {fmtBRL(i.preco_unitario)}
+                    {fmtQuantidade(i.quantidade, i.quantidade_por_caixa)} ·{" "}
+                    {fmtBRL(i.preco_unitario)} / UN
                   </span>
                   <span className="font-bold text-primary">{fmtBRL(subtotalItem(i))}</span>
                 </div>
+
               </div>
             ))}
           </Card>
