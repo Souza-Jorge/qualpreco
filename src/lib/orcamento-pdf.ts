@@ -1,7 +1,14 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import logoUrl from "@/assets/logo-xapadao.png";
-import { fmtData, fmtNumero, type ItemLocal, type Orcamento } from "@/lib/orcamentos";
+import {
+  fmtData,
+  fmtNumero,
+  fmtQuantidade,
+  type ItemLocal,
+  type Orcamento,
+} from "@/lib/orcamentos";
+
 
 const EMPRESA = "XAPADÃO BEBIDAS";
 
