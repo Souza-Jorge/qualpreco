@@ -94,6 +94,9 @@ export function OrcamentoEditor({
 
   const addProduto = (p: Produto) => {
     const { precoFinal } = precoVigente(p);
+    const packBruto = Number((p as any).pack);
+    const pack =
+      Number.isFinite(packBruto) && packBruto > 1 ? Math.round(packBruto) : null;
     setOk(false);
     setItens((prev) => {
       const existente = prev.find((i) => i.product_id === p.codigo);
@@ -111,6 +114,7 @@ export function OrcamentoEditor({
           produto_nome: p.name,
           ean: p.barcode,
           quantidade: 1,
+          quantidade_por_caixa: pack,
           preco_unitario: precoFinal ?? 0,
         },
       ];
@@ -124,10 +128,23 @@ export function OrcamentoEditor({
     );
   };
 
+  const setPack = (key: string, v: string) => {
+    const n = parseInt(v.replace(/\D/g, ""), 10);
+    setOk(false);
+    setItens((prev) =>
+      prev.map((i) =>
+        i.key === key
+          ? { ...i, quantidade_por_caixa: !isNaN(n) && n > 0 ? n : null }
+          : i
+      )
+    );
+  };
+
   const remover = (key: string) => {
     setOk(false);
     setItens((prev) => prev.filter((i) => i.key !== key));
   };
+
 
   const salvar = async () => {
     if (bloqueado || salvando) return;
