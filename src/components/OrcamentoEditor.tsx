@@ -105,7 +105,17 @@ export function OrcamentoEditor({
       const existente = prev.find((i) => i.product_id === p.codigo);
       if (existente) {
         return prev.map((i) =>
-          i.key === existente.key ? { ...i, quantidade: i.quantidade + 1 } : i
+          i.key === existente.key
+            ? {
+                ...i,
+                unidades: i.unidades + 1,
+                quantidade: totalUnidades(
+                  i.caixas,
+                  i.unidades + 1,
+                  i.quantidade_por_caixa
+                ),
+              }
+            : i
         );
       }
       return [
@@ -118,28 +128,31 @@ export function OrcamentoEditor({
           ean: p.barcode,
           quantidade: 1,
           quantidade_por_caixa: pack,
+          caixas: 0,
+          unidades: 1,
           preco_unitario: precoFinal ?? 0,
         },
       ];
     });
   };
 
-  const setQtd = (key: string, q: number) => {
-    setOk(false);
-    setItens((prev) =>
-      prev.map((i) => (i.key === key ? { ...i, quantidade: Math.max(q, 1) } : i))
-    );
-  };
-
-  const setPack = (key: string, v: string) => {
+  const setQtdCampo = (key: string, campo: "caixas" | "unidades", v: string) => {
     const n = parseInt(v.replace(/\D/g, ""), 10);
+    const valor = !isNaN(n) && n > 0 ? n : 0;
     setOk(false);
     setItens((prev) =>
-      prev.map((i) =>
-        i.key === key
-          ? { ...i, quantidade_por_caixa: !isNaN(n) && n > 0 ? n : null }
-          : i
-      )
+      prev.map((i) => {
+        if (i.key !== key) return i;
+        const atualizado = { ...i, [campo]: valor } as typeof i;
+        return {
+          ...atualizado,
+          quantidade: totalUnidades(
+            atualizado.caixas,
+            atualizado.unidades,
+            atualizado.quantidade_por_caixa
+          ),
+        };
+      })
     );
   };
 
