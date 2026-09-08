@@ -42,7 +42,21 @@ export type ItemLocal = {
   ean: string | null;
   quantidade: number;
   quantidade_por_caixa: number | null;
+  caixas: number;
+  unidades: number;
   preco_unitario: number;
+};
+
+// Quantidade total em unidades a partir de caixas + unidades avulsas
+export const totalUnidades = (
+  caixas: number,
+  unidades: number,
+  pack: number | null | undefined
+) => {
+  const p = Number(pack || 0);
+  const cx = Math.max(Math.floor(Number(caixas) || 0), 0);
+  const un = Math.max(Number(unidades) || 0, 0);
+  return (p > 0 ? cx * p : 0) + un;
 };
 
 
