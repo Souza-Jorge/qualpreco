@@ -1,0 +1,56 @@
+QUALPREÇO
+========================================
+
+VERSÃO
+1.1.0
+
+APPLICATION ID
+br.com.qualpreco.app
+
+VERSION CODE
+2
+
+VERSION NAME
+1.1.0
+
+TIPO
+Android Release
+
+ASSINATURA
+Release / PKCS12 (mesma keystore da 1.0.0)
+
+ALIAS
+qualpreco
+
+KEYSTORE
+C:\Users\Dell\Documents\AndroidKeys\qualpreco-release.p12
+
+APK
+QualPreco-1.1.0.apk
+
+STATUS
+Aguardando validação em aparelho físico
+
+NOVIDADES
+- Módulo de Orçamentos (criação e edição de rascunho)
+- Busca de produtos e scanner reaproveitados no orçamento
+- Histórico de orçamentos com busca e filtros de status
+- Visualização de orçamento com finalizar e cancelar
+- Geração de PDF do orçamento (A4, logo, itens, totais)
+- Compartilhamento do PDF pelo menu nativo do Android
+
+TESTES A REALIZAR NO APARELHO
+- Consulta por código, nome e EAN
+- Scanner de código de barras
+- Promoções
+- Criar, editar, finalizar e cancelar orçamento
+- Gerar PDF
+- Compartilhar PDF (WhatsApp como anexo)
+- Cancelar compartilhamento e voltar ao app
+- Botão voltar e histórico
+
+OBSERVAÇÃO
+A keystore oficial não deve ser recriada.
+Esta versão deve ser assinada com a mesma chave da 1.0.0.
+
+========================================
