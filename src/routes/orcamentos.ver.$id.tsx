@@ -212,6 +212,20 @@ function Detalhe({ id }: { id: string }) {
         )}
       </Card>
 
+      <Button
+        variant="outline"
+        className="h-14 w-full gap-2 text-base font-semibold"
+        onClick={gerarPdf}
+        disabled={gerandoPdf}
+      >
+        {gerandoPdf ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <FileDown className="h-5 w-5" />
+        )}
+        Gerar PDF
+      </Button>
+
       {acao && (
         <Card className="space-y-3 border-primary/40 p-4">
           <p className="text-sm font-medium">
