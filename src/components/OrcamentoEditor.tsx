@@ -279,6 +279,9 @@ export function OrcamentoEditor({
                     <div className="text-[11px] text-muted-foreground">
                       #{i.codigo}
                       {i.ean ? ` · ${i.ean}` : ""}
+                      {i.quantidade_por_caixa
+                        ? ` · Pack: ${i.quantidade_por_caixa} UN/CX`
+                        : ""}
                     </div>
                   </div>
                   <button
