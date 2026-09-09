@@ -141,7 +141,7 @@ export async function gerarOrcamentoPdf(
     startY: y,
     head: [["Código", "Produto", "Qtd.", "Preço unit.", "Subtotal"]],
     body: corpo.length > 0 ? corpo : [["", "Nenhum item neste orçamento.", "", "", ""]],
-    margin: { left: margem, right: margem, bottom: 20 },
+    margin: { left: margem, right: margem, bottom: 34 },
     styles: { font: "helvetica", fontSize: 9, cellPadding: 2.2, textColor: 30 },
     headStyles: {
       fillColor: [24, 24, 27],
