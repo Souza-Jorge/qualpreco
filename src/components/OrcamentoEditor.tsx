@@ -124,10 +124,10 @@ export function OrcamentoEditor({
           codigo: String(p.codigo),
           produto_nome: p.name,
           ean: p.barcode,
-          quantidade: 1,
+          quantidade: 0,
           quantidade_por_caixa: pack,
           caixas: 0,
-          unidades: 1,
+          unidades: 0,
           preco_unitario: precoFinal ?? 0,
         },
         ...prev,
@@ -304,7 +304,7 @@ export function OrcamentoEditor({
                         </label>
                         <Input
                           id={`cx-${i.key}`}
-                          value={i.caixas ? String(i.caixas) : ""}
+                          value={String(i.caixas ?? 0)}
                           disabled={bloqueado}
                           inputMode="numeric"
                           placeholder="0"
@@ -325,7 +325,7 @@ export function OrcamentoEditor({
                       </label>
                       <Input
                         id={`un-${i.key}`}
-                        value={i.unidades ? String(i.unidades) : ""}
+                        value={String(i.unidades ?? 0)}
                         disabled={bloqueado}
                         inputMode="numeric"
                         placeholder="0"
