@@ -451,9 +451,7 @@ function Index() {
                       )}
                       {promoAtiva && (
                         <span className="shrink-0 text-[10px] font-medium text-destructive">
-                          {p.promo_end
-                            ? `até ${fmtDateList(p.promo_end)}`
-                            : "Oferta sem prazo"}
+                          até {fmtDateList(p.promo_end)}
                         </span>
                       )}
                     </div>
