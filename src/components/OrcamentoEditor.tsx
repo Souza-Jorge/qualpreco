@@ -339,7 +339,7 @@ export function OrcamentoEditor({
                     <span className="text-xs text-muted-foreground">
                       × {fmtBRL(i.preco_unitario)} / UN
                     </span>
-                    <span className="text-xs font-medium text-muted-foreground">
+                    <span className="ml-6 text-xs font-medium text-muted-foreground">
                       {fmtQuantidade(i.quantidade, i.quantidade_por_caixa)}
                     </span>
                   </div>
