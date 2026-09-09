@@ -336,7 +336,7 @@ export function OrcamentoEditor({
                         aria-label="Unidades"
                       />
                     </div>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-sm text-muted-foreground">
                       × {fmtBRL(i.preco_unitario)} / UN
                     </span>
                     <span className="ml-6 text-sm font-bold text-foreground">
