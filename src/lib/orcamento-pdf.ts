@@ -10,7 +10,12 @@ import {
 } from "@/lib/orcamentos";
 
 
-const EMPRESA = "XAPADÃO BEBIDAS";
+const EMPRESA = "COMÉRCIO DE BEBIDAS CHAPADA D’OESTE LTDA";
+const CNPJ = "CNPJ. 08.859.942/0001-31";
+const IE = "INSC. EST. 373.111.107.116";
+const ENDERECO =
+  "Rua Angelina Barreto Fernandes Nº. 54 – Vila Aurora, Itapevi-SP – 06657-060";
+const TELEFONES = "TEL.: 4141-5209 - 4142-3787 – 4773-8902";
 
 const brl = (n: number) =>
   "R$ " +
