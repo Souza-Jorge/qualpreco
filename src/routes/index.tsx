@@ -24,16 +24,24 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ProdutoCard } from "@/components/ProdutoCard";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
+import logoXapadao from "@/assets/logo-xapadao-header.webp.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Consulta de Preços" },
+      { title: "Consulta de Preços e Orçamentos | QualPreço" },
       {
         name: "description",
         content:
           "Consulta rápida de preços por código, nome ou leitura de código de barras.",
       },
+      { property: "og:title", content: "Consulta de Preços e Orçamentos | QualPreço" },
+      {
+        property: "og:description",
+        content: "Consulte preços e crie orçamentos com rapidez no QualPreço.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Index,
@@ -291,9 +299,16 @@ function Index() {
     <div className="min-h-screen overflow-x-hidden bg-background">
       <div className="sticky top-0 z-30 border-b border-border/50 bg-primary shadow-md">
         <header className="mx-auto w-full max-w-3xl px-4 pb-3 pt-6 text-primary-foreground">
-          <h1 className="text-xl font-bold leading-tight md:text-2xl">
-            Consulta de Preços e Orçamentos
-          </h1>
+          <div className="flex min-w-0 items-center gap-3">
+            <img
+              src={logoXapadao.url}
+              alt="Xapadão Bebidas"
+              className="h-11 w-24 shrink-0 object-contain object-left sm:h-14 sm:w-32"
+            />
+            <h1 className="min-w-0 text-lg font-bold leading-tight sm:text-xl md:text-2xl">
+              Consulta de Preços e Orçamentos
+            </h1>
+          </div>
           <p className="text-xs opacity-80 md:text-sm">
             Busque por código, nome ou escaneie o código de barras
           </p>
