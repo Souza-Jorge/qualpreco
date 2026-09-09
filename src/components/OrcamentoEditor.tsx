@@ -289,6 +289,63 @@ export function OrcamentoEditor({
         </button>
         {mostrarCliente && (
           <div className="space-y-2 border-t px-4 py-3">
+            {!bloqueado && (
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={clienteBusca}
+                  onChange={(e) => setClienteBusca(e.target.value)}
+                  placeholder="Buscar cliente cadastrado..."
+                  inputMode="search"
+                  className="h-12 pl-10 pr-10 text-base"
+                  aria-label="Buscar cliente cadastrado"
+                />
+                {clienteBuscando ? (
+                  <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+                ) : clienteBusca ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setClienteBusca("");
+                      setClienteResultados([]);
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-muted-foreground hover:bg-accent"
+                    aria-label="Limpar busca de cliente"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                ) : null}
+                {clienteResultados.length > 0 && (
+                  <Card className="absolute inset-x-0 top-full z-20 mt-1 max-h-56 divide-y overflow-y-auto shadow-lg">
+                    {clienteResultados.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => selecionarCliente(c)}
+                        className="w-full px-3 py-2.5 text-left transition-colors hover:bg-accent active:bg-accent"
+                      >
+                        <div className="truncate text-sm font-medium">
+                          {c.nome}
+                          {c.empresa ? (
+                            <span className="text-muted-foreground">
+                              {" "}
+                              · {c.empresa}
+                            </span>
+                          ) : null}
+                        </div>
+                        {(c.telefone || c.cpf_cnpj) && (
+                          <div className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                            {[c.telefone, c.cpf_cnpj]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </Card>
+                )}
+              </div>
+            )}
             {(
               [
                 ["cliente_nome", "Nome", "text"],
