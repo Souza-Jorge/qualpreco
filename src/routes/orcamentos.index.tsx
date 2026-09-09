@@ -182,6 +182,11 @@ function OrcamentosPage() {
     <div className="min-h-screen overflow-x-hidden bg-background">
       <OrcamentoHeader titulo="Orçamentos" />
       <main className="mx-auto w-full max-w-3xl px-4 py-4">
+        {MODO_TESTE_SEM_LOGIN && (
+          <p className="mb-3 rounded-md border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
+            Modo de teste — acesso sem login
+          </p>
+        )}
         <AuthGate>{(userId) => <Lista userId={userId} />}</AuthGate>
       </main>
     </div>
