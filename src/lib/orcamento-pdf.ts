@@ -85,8 +85,8 @@ export async function gerarOrcamentoPdf(
   );
   doc.setTextColor(0);
 
-  y += 24;
-  doc.setDrawColor(200);
+  y += 22;
+  doc.setDrawColor(120);
   doc.line(margem, y, larguraPagina - margem, y);
   y += 8;
 
