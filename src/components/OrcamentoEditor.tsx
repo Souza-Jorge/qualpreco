@@ -57,6 +57,11 @@ export function OrcamentoEditor({
   const [numero, setNumero] = useState<number | null>(null);
   const [status, setStatus] = useState<OrcamentoStatus>("Rascunho");
   const [mostrarCliente, setMostrarCliente] = useState(false);
+  const [clienteBusca, setClienteBusca] = useState("");
+  const [clienteResultados, setClienteResultados] = useState<Cliente[]>([]);
+  const [clienteBuscando, setClienteBuscando] = useState(false);
+  const [salvandoCliente, setSalvandoCliente] = useState(false);
+  const clienteReqRef = useRef(0);
 
   useEffect(() => {
     if (!orcamentoId) return;
