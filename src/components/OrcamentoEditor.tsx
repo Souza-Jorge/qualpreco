@@ -271,7 +271,7 @@ export function OrcamentoEditor({
         ) : (
           <Card className="divide-y">
             {itens.map((i) => (
-              <div key={i.key} className="space-y-1 p-2 pt-1">
+              <div key={i.key} className="space-y-1 p-2 pt-1 pb-1">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="text-sm font-medium">
