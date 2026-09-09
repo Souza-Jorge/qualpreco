@@ -118,7 +118,6 @@ export function OrcamentoEditor({
         );
       }
       return [
-        ...prev,
         {
           key: `${p.codigo}-${Date.now()}`,
           product_id: p.codigo,
@@ -131,6 +130,7 @@ export function OrcamentoEditor({
           unidades: 1,
           preco_unitario: precoFinal ?? 0,
         },
+        ...prev,
       ];
     });
   };
