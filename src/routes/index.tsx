@@ -526,7 +526,7 @@ function Index() {
                 <button
                   key={h.codigo}
                   onClick={() => loadFromHistory(h.codigo)}
-                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left transition-colors hover:bg-accent"
+                  className="flex w-full items-center gap-2 px-4 py-2 text-left transition-colors hover:bg-accent"
                 >
                   <div className="shrink-0 text-xs text-muted-foreground">
                     {h.codigo}
