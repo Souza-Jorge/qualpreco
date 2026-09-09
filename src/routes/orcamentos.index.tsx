@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Loader2, Plus, Search, FileText } from "lucide-react";
 import { AuthGate } from "@/components/AuthGate";
+import { MODO_TESTE_SEM_LOGIN } from "@/lib/modo-teste";
 import { OrcamentoHeader } from "@/components/OrcamentoEditor";
 import {
   fmtData,
@@ -182,6 +183,11 @@ function OrcamentosPage() {
     <div className="min-h-screen overflow-x-hidden bg-background">
       <OrcamentoHeader titulo="Orçamentos" />
       <main className="mx-auto w-full max-w-3xl px-4 py-4">
+        {MODO_TESTE_SEM_LOGIN && (
+          <p className="mb-3 rounded-md border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
+            Modo de teste — acesso sem login
+          </p>
+        )}
         <AuthGate>{(userId) => <Lista userId={userId} />}</AuthGate>
       </main>
     </div>

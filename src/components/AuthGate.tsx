@@ -4,10 +4,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { MODO_TESTE_SEM_LOGIN, USUARIO_TESTE_ID } from "@/lib/modo-teste";
 
 // Exige usuário autenticado (RLS dos orçamentos usa auth.uid()).
 // Não altera as telas existentes: só protege o módulo de Orçamentos.
 export function AuthGate({
+  children,
+}: {
+  children: (userId: string) => React.ReactNode;
+}) {
+  // Modo de teste: entra direto, sem pedir e-mail e senha.
+  if (MODO_TESTE_SEM_LOGIN) return <>{children(USUARIO_TESTE_ID)}</>;
+  return <AuthGateLogin>{children}</AuthGateLogin>;
+}
+
+function AuthGateLogin({
   children,
 }: {
   children: (userId: string) => React.ReactNode;
@@ -18,6 +29,7 @@ export function AuthGate({
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState<string | null>(null);
   const [entrando, setEntrando] = useState(false);
+
 
   useEffect(() => {
     let ativo = true;
