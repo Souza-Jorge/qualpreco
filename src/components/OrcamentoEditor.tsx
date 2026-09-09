@@ -60,6 +60,7 @@ export function OrcamentoEditor({
   const [clienteBusca, setClienteBusca] = useState("");
   const [clienteResultados, setClienteResultados] = useState<Cliente[]>([]);
   const [clienteBuscando, setClienteBuscando] = useState(false);
+  const [clienteBuscaConcluida, setClienteBuscaConcluida] = useState(false);
   const [salvandoCliente, setSalvandoCliente] = useState(false);
   const clienteReqRef = useRef(0);
 
@@ -104,9 +105,11 @@ export function OrcamentoEditor({
     if (q.length < 2) {
       setClienteResultados([]);
       setClienteBuscando(false);
+      setClienteBuscaConcluida(false);
       return;
     }
     setClienteBuscando(true);
+    setClienteBuscaConcluida(false);
     const t = setTimeout(async () => {
       const reqId = ++clienteReqRef.current;
       try {
@@ -115,7 +118,10 @@ export function OrcamentoEditor({
       } catch {
         if (reqId === clienteReqRef.current) setClienteResultados([]);
       } finally {
-        if (reqId === clienteReqRef.current) setClienteBuscando(false);
+        if (reqId === clienteReqRef.current) {
+          setClienteBuscando(false);
+          setClienteBuscaConcluida(true);
+        }
       }
     }, 350);
     return () => clearTimeout(t);
@@ -308,6 +314,7 @@ export function OrcamentoEditor({
                     onClick={() => {
                       setClienteBusca("");
                       setClienteResultados([]);
+                      setClienteBuscaConcluida(false);
                     }}
                     className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-muted-foreground hover:bg-accent"
                     aria-label="Limpar busca de cliente"
@@ -342,6 +349,11 @@ export function OrcamentoEditor({
                         )}
                       </button>
                     ))}
+                  </Card>
+                )}
+                {clienteBuscaConcluida && clienteResultados.length === 0 && (
+                  <Card className="absolute inset-x-0 top-full z-20 mt-1 p-3 text-sm text-muted-foreground shadow-lg">
+                    Nenhum cliente encontrado para esta conta.
                   </Card>
                 )}
               </div>
