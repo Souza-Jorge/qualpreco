@@ -53,7 +53,8 @@ export function ProdutoCard({ produto }: { produto: Produto }) {
   const todayStr = new Date().toLocaleDateString("en-CA");
   const promoAtiva =
     precoPromo != null &&
-    (!produto.promo_end || produto.promo_end >= todayStr);
+    produto.promo_end != null &&
+    produto.promo_end >= todayStr;
 
   const precoFinal = promoAtiva ? precoPromo : precoVenda;
 
