@@ -274,10 +274,9 @@ export function OrcamentoEditor({
               <div key={i.key} className="space-y-2 p-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <div className="text-sm font-medium">{i.produto_nome}</div>
-                    <div className="text-[11px] text-muted-foreground">
-                      #{i.codigo}
-                      {i.ean ? ` · ${i.ean}` : ""}
+                    <div className="text-sm font-medium">
+                      <span className="text-muted-foreground">#{i.codigo}</span>{" "}
+                      {i.produto_nome}
                       {i.quantidade_por_caixa
                         ? ` · Pack: ${i.quantidade_por_caixa} UN/CX`
                         : ""}
