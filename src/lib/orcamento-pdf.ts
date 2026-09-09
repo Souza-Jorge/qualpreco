@@ -162,7 +162,7 @@ export async function gerarOrcamentoPdf(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let fim = (doc as any).lastAutoTable.finalY + 8;
   const alturaBloco = 30;
-  if (fim + alturaBloco > alturaPagina - 20) {
+  if (fim + alturaBloco > alturaPagina - 34) {
     doc.addPage();
     fim = margem;
   }
