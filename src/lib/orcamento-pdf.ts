@@ -10,7 +10,12 @@ import {
 } from "@/lib/orcamentos";
 
 
-const EMPRESA = "XAPADÃO BEBIDAS";
+const EMPRESA = "COMÉRCIO DE BEBIDAS CHAPADA D’OESTE LTDA";
+const CNPJ = "CNPJ. 08.859.942/0001-31";
+const IE = "INSC. EST. 373.111.107.116";
+const ENDERECO =
+  "Rua Angelina Barreto Fernandes Nº. 54 – Vila Aurora, Itapevi-SP – 06657-060";
+const TELEFONES = "TEL.: 4141-5209 - 4142-3787 – 4773-8902";
 
 const brl = (n: number) =>
   "R$ " +
@@ -55,7 +60,7 @@ export async function gerarOrcamentoPdf(
   let y = margem;
 
   if (logo) {
-    const lw = 34;
+    const lw = 40;
     const lh = (lw * 181) / 420;
     try {
       doc.addImage(logo, "PNG", margem, y, lw, lh);
@@ -63,15 +68,6 @@ export async function gerarOrcamentoPdf(
       /* segue sem logo */
     }
   }
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(15);
-  doc.text(EMPRESA, margem + 40, y + 7);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(110);
-  doc.text("Orçamento de produtos", margem + 40, y + 12.5);
-  doc.setTextColor(0);
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(17);
@@ -89,8 +85,8 @@ export async function gerarOrcamentoPdf(
   );
   doc.setTextColor(0);
 
-  y += 24;
-  doc.setDrawColor(200);
+  y += 22;
+  doc.setDrawColor(120);
   doc.line(margem, y, larguraPagina - margem, y);
   y += 8;
 
@@ -145,7 +141,7 @@ export async function gerarOrcamentoPdf(
     startY: y,
     head: [["Código", "Produto", "Qtd.", "Preço unit.", "Subtotal"]],
     body: corpo.length > 0 ? corpo : [["", "Nenhum item neste orçamento.", "", "", ""]],
-    margin: { left: margem, right: margem, bottom: 20 },
+    margin: { left: margem, right: margem, bottom: 34 },
     styles: { font: "helvetica", fontSize: 9, cellPadding: 2.2, textColor: 30 },
     headStyles: {
       fillColor: [24, 24, 27],
@@ -166,7 +162,7 @@ export async function gerarOrcamentoPdf(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let fim = (doc as any).lastAutoTable.finalY + 8;
   const alturaBloco = 30;
-  if (fim + alturaBloco > alturaPagina - 20) {
+  if (fim + alturaBloco > alturaPagina - 34) {
     doc.addPage();
     fim = margem;
   }
@@ -190,7 +186,7 @@ export async function gerarOrcamentoPdf(
   // ---------- Observação ----------
   const obs = (orc.observacao ?? "").trim();
   if (obs.length > 0) {
-    if (depois > alturaPagina - 40) {
+    if (depois > alturaPagina - 54) {
       doc.addPage();
       depois = margem;
     }
@@ -203,23 +199,38 @@ export async function gerarOrcamentoPdf(
     doc.text(linhas, margem, depois + 5.5);
   }
 
-  // ---------- Rodapé ----------
+  // ---------- Rodapé (papel timbrado) ----------
   const total = doc.getNumberOfPages();
+  const centro = larguraPagina / 2;
   for (let p = 1; p <= total; p++) {
     doc.setPage(p);
-    doc.setDrawColor(220);
-    doc.line(margem, alturaPagina - 14, larguraPagina - margem, alturaPagina - 14);
+
+    const base = alturaPagina - 28;
+    doc.setDrawColor(80);
+    doc.setLineWidth(0.4);
+    doc.line(margem + 20, base, larguraPagina - margem - 20, base);
+    doc.setLineWidth(0.2);
+
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0);
+    doc.setFontSize(8.5);
+    doc.text(EMPRESA, centro, base + 5, { align: "center" });
+
+    doc.setFontSize(7.5);
+    doc.text(CNPJ, margem + 26, base + 10);
+    doc.text(IE, larguraPagina - margem - 26, base + 10, { align: "right" });
+    doc.text(ENDERECO, centro, base + 15, { align: "center" });
+    doc.text(TELEFONES, centro, base + 20, { align: "center" });
+
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(120);
+    doc.setFontSize(7);
+    doc.setTextColor(130);
     doc.text(
-      `${EMPRESA} — ${fmtNumero(orc.numero)} — ${fmtData(orc.created_at)}`,
-      margem,
-      alturaPagina - 9
+      `${fmtNumero(orc.numero)} — ${fmtData(orc.created_at)}   |   Página ${p} de ${total}`,
+      larguraPagina - margem,
+      base - 2,
+      { align: "right" }
     );
-    doc.text(`Página ${p} de ${total}`, larguraPagina - margem, alturaPagina - 9, {
-      align: "right",
-    });
     doc.setTextColor(0);
   }
 
