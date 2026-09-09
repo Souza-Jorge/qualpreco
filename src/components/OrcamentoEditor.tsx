@@ -1,12 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft,
   Check,
   Loader2,
   Save,
+  Search,
   Trash2,
   User,
+  UserPlus,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Produto } from "@/integrations/supabase/client";
@@ -24,6 +27,11 @@ import {
   type ItemLocal,
   type OrcamentoStatus,
 } from "@/lib/orcamentos";
+import {
+  buscarClientes,
+  criarCliente,
+  type Cliente,
+} from "@/lib/clientes";
 
 import { BuscaProdutos } from "@/components/BuscaProdutos";
 import { Input } from "@/components/ui/input";
