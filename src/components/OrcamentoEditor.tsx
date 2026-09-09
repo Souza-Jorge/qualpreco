@@ -98,6 +98,67 @@ export function OrcamentoEditor({
     };
   }, [orcamentoId]);
 
+  // Busca de clientes cadastrados (debounce)
+  useEffect(() => {
+    const q = clienteBusca.trim();
+    if (q.length < 2) {
+      setClienteResultados([]);
+      setClienteBuscando(false);
+      return;
+    }
+    setClienteBuscando(true);
+    const t = setTimeout(async () => {
+      const reqId = ++clienteReqRef.current;
+      try {
+        const lista = await buscarClientes(q);
+        if (reqId === clienteReqRef.current) setClienteResultados(lista);
+      } catch {
+        if (reqId === clienteReqRef.current) setClienteResultados([]);
+      } finally {
+        if (reqId === clienteReqRef.current) setClienteBuscando(false);
+      }
+    }, 350);
+    return () => clearTimeout(t);
+  }, [clienteBusca]);
+
+  const selecionarCliente = (c: Cliente) => {
+    setCliente((prev) => ({
+      ...prev,
+      cliente_nome: c.nome ?? "",
+      cliente_empresa: c.empresa ?? "",
+      cliente_cpf_cnpj: c.cpf_cnpj ?? "",
+      cliente_telefone: c.telefone ?? "",
+      cliente_email: c.email ?? "",
+    }));
+    setClienteBusca("");
+    setClienteResultados([]);
+  };
+
+  // Cadastro rápido: salva os dados do formulário como novo cliente
+  const salvarNovoCliente = async () => {
+    if (salvandoCliente) return;
+    const nome = cliente.cliente_nome.trim();
+    if (!nome) {
+      toast.error("Informe o nome do cliente para cadastrar.");
+      return;
+    }
+    setSalvandoCliente(true);
+    try {
+      await criarCliente(userId, {
+        nome,
+        empresa: cliente.cliente_empresa,
+        cpf_cnpj: cliente.cliente_cpf_cnpj,
+        telefone: cliente.cliente_telefone,
+        email: cliente.cliente_email,
+      });
+      toast.success("Cliente cadastrado.");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Não foi possível cadastrar o cliente.");
+    } finally {
+      setSalvandoCliente(false);
+    }
+  };
+
   const desconto = useMemo(() => {
     const n = parseFloat(descontoTxt.replace(",", "."));
     return isNaN(n) || n < 0 ? 0 : n;
