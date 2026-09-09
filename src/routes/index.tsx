@@ -422,7 +422,9 @@ function Index() {
               const promo = toNumber(p.promo_price);
               const todayStr = new Date().toLocaleDateString("en-CA");
               const promoAtiva =
-                promo != null && (!p.promo_end || p.promo_end >= todayStr);
+                promo != null &&
+                p.promo_end != null &&
+                p.promo_end >= todayStr;
               const precoFinal = promoAtiva ? promo : preco;
               const estoque = p.stock_quantity ?? 0;
               const semEstoque = estoque <= 0;
@@ -449,9 +451,7 @@ function Index() {
                       )}
                       {promoAtiva && (
                         <span className="shrink-0 text-[10px] font-medium text-destructive">
-                          {p.promo_end
-                            ? `até ${fmtDateList(p.promo_end)}`
-                            : "Oferta sem prazo"}
+                          até {fmtDateList(p.promo_end)}
                         </span>
                       )}
                     </div>

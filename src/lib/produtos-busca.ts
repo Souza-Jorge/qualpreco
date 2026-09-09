@@ -24,7 +24,8 @@ const aplicarPromo = (qb: any) => {
   const todayStr = hojeStr();
   return qb
     .not("promo_price", "is", null)
-    .or(`promo_end.is.null,promo_end.gte.${todayStr}`);
+    .not("promo_end", "is", null)
+    .gte("promo_end", todayStr);
 };
 
 export type BuscaOpts = { onlyPromo?: boolean };
@@ -111,7 +112,8 @@ export const getFriendlyError = (e: any, context: "search" | "promo" = "search")
 export const precoVigente = (p: Produto) => {
   const preco = toNumber(p.sale_price);
   const promo = toNumber(p.promo_price);
-  const promoAtiva = promo != null && (!p.promo_end || p.promo_end >= hojeStr());
+  const promoAtiva =
+    promo != null && p.promo_end != null && p.promo_end >= hojeStr();
   return { preco, promo, promoAtiva, precoFinal: promoAtiva ? promo : preco };
 };
 
