@@ -271,8 +271,8 @@ export function OrcamentoEditor({
         ) : (
           <Card className="divide-y">
             {itens.map((i) => (
-              <div key={i.key} className="space-y-1 p-2 pt-3 pb-1">
-                <div className="flex items-start justify-between gap-2">
+              <div key={i.key} className="space-y-1 p-2 pt-2 pb-1">
+                <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0">
                     <div className="text-sm font-medium">
                       <span className="text-muted-foreground">#{i.codigo}</span>{" "}
@@ -286,7 +286,7 @@ export function OrcamentoEditor({
                     type="button"
                     onClick={() => remover(i.key)}
                     disabled={bloqueado}
-                    className="rounded-md p-2 text-destructive hover:bg-destructive/10"
+                    className="shrink-0 rounded-md p-1 text-destructive hover:bg-destructive/10"
                     aria-label="Remover item"
                   >
                     <Trash2 className="h-4 w-4" />
