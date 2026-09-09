@@ -20,6 +20,10 @@ export function AuthGate({
   const [erro, setErro] = useState<string | null>(null);
   const [entrando, setEntrando] = useState(false);
 
+  if (MODO_TESTE_SEM_LOGIN) {
+    return <>{children(USUARIO_TESTE_ID)}</>;
+  }
+
   useEffect(() => {
     let ativo = true;
     supabase.auth.getSession().then(({ data }) => {
