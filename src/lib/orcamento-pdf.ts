@@ -60,7 +60,7 @@ export async function gerarOrcamentoPdf(
   let y = margem;
 
   if (logo) {
-    const lw = 34;
+    const lw = 40;
     const lh = (lw * 181) / 420;
     try {
       doc.addImage(logo, "PNG", margem, y, lw, lh);
@@ -68,15 +68,6 @@ export async function gerarOrcamentoPdf(
       /* segue sem logo */
     }
   }
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(15);
-  doc.text(EMPRESA, margem + 40, y + 7);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(110);
-  doc.text("Orçamento de produtos", margem + 40, y + 12.5);
-  doc.setTextColor(0);
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(17);
