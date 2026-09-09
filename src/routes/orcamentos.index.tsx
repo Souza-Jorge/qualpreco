@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Loader2, Plus, Search, FileText } from "lucide-react";
 import { AuthGate } from "@/components/AuthGate";
+import { MODO_TESTE_SEM_LOGIN } from "@/lib/modo-teste";
 import { OrcamentoHeader } from "@/components/OrcamentoEditor";
 import {
   fmtData,
