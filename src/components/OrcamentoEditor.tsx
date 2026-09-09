@@ -367,6 +367,22 @@ export function OrcamentoEditor({
                 className="h-12 text-base"
               />
             ))}
+            {!bloqueado && (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={salvarNovoCliente}
+                disabled={salvandoCliente}
+                className="h-11 w-full gap-2 text-sm font-semibold"
+              >
+                {salvandoCliente ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <UserPlus className="h-4 w-4" />
+                )}
+                Cadastrar como novo cliente
+              </Button>
+            )}
             <Textarea
               value={cliente.observacao}
               disabled={bloqueado}
