@@ -325,7 +325,7 @@ export function OrcamentoEditor({
                       </label>
                       <Input
                         id={`un-${i.key}`}
-                        value={i.unidades ? String(i.unidades) : ""}
+                        value={String(i.unidades ?? 0)}
                         disabled={bloqueado}
                         inputMode="numeric"
                         placeholder="0"
