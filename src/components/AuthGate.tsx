@@ -13,6 +13,16 @@ export function AuthGate({
 }: {
   children: (userId: string) => React.ReactNode;
 }) {
+  // Modo de teste: entra direto, sem pedir e-mail e senha.
+  if (MODO_TESTE_SEM_LOGIN) return <>{children(USUARIO_TESTE_ID)}</>;
+  return <AuthGateLogin>{children}</AuthGateLogin>;
+}
+
+function AuthGateLogin({
+  children,
+}: {
+  children: (userId: string) => React.ReactNode;
+}) {
   const [userId, setUserId] = useState<string | null>(null);
   const [checando, setChecando] = useState(true);
   const [email, setEmail] = useState("");
@@ -20,9 +30,6 @@ export function AuthGate({
   const [erro, setErro] = useState<string | null>(null);
   const [entrando, setEntrando] = useState(false);
 
-  if (MODO_TESTE_SEM_LOGIN) {
-    return <>{children(USUARIO_TESTE_ID)}</>;
-  }
 
   useEffect(() => {
     let ativo = true;
