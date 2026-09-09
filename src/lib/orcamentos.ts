@@ -264,15 +264,15 @@ export const fmtQuantidade = (
   quantidadePorCaixa: number | null | undefined
 ) => {
   const q = Number(quantidade || 0);
-  const base = `${numUn(q)} UN`;
   const pack = Number(quantidadePorCaixa || 0);
-  if (!pack || pack <= 0 || !Number.isInteger(q)) return base;
+  if (!pack || pack <= 0 || !Number.isInteger(q)) return `${numUn(q)} UN`;
   const caixas = Math.floor(q / pack);
   const resto = q - caixas * pack;
-  if (caixas <= 0) return base;
-  return resto > 0
-    ? `${base} | ${caixas} CX + ${numUn(resto)} UN`
-    : `${base} | ${caixas} CX`;
+  if (caixas <= 0) return `${numUn(q)} UN`;
+  const cx = resto > 0
+    ? `${caixas} CX + ${numUn(resto)} UN`
+    : `${caixas} CX`;
+  return `${cx} | ${numUn(q)} UN`;
 };
 
 
