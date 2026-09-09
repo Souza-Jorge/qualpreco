@@ -265,14 +265,14 @@ export const fmtQuantidade = (
 ) => {
   const q = Number(quantidade || 0);
   const pack = Number(quantidadePorCaixa || 0);
-  if (!pack || pack <= 0 || !Number.isInteger(q)) return `${numUn(q)} UN`;
+  if (!pack || pack <= 0 || !Number.isInteger(q)) return `${numUn(q)} unid`;
   const caixas = Math.floor(q / pack);
   const resto = q - caixas * pack;
-  if (caixas <= 0) return `${numUn(q)} UN`;
+  if (caixas <= 0) return `${numUn(q)} unid`;
   const cx = resto > 0
     ? `${caixas} CX + ${numUn(resto)} UN`
     : `${caixas} CX`;
-  return `${cx} | ${numUn(q)} UN`;
+  return `${cx} = ${numUn(q)} unid`;
 };
 
 
