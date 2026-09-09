@@ -528,10 +528,10 @@ function Index() {
                   onClick={() => loadFromHistory(h.codigo)}
                   className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left transition-colors hover:bg-accent"
                 >
-                  <div className="min-w-0 truncate text-sm">{h.name}</div>
                   <div className="shrink-0 text-xs text-muted-foreground">
                     {h.codigo}
                   </div>
+                  <div className="min-w-0 truncate text-sm">{h.name}</div>
                 </button>
               ))}
             </Card>
