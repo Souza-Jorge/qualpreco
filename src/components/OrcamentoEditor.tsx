@@ -289,7 +289,7 @@ export function OrcamentoEditor({
                     className="rounded-md p-2 text-destructive hover:bg-destructive/10"
                     aria-label="Remover item"
                   >
-                    <Trash2 className="h-5 w-5" />
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
                 <div className="flex flex-wrap items-center justify-between gap-2">
