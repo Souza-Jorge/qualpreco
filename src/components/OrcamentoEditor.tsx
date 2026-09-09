@@ -311,7 +311,7 @@ export function OrcamentoEditor({
                           onChange={(e) =>
                             setQtdCampo(i.key, "caixas", e.target.value)
                           }
-                          className="h-11 w-16 text-center text-base"
+                          className="h-8 w-14 text-center text-sm"
                           aria-label="Caixas"
                         />
                       </div>
@@ -332,7 +332,7 @@ export function OrcamentoEditor({
                         onChange={(e) =>
                           setQtdCampo(i.key, "unidades", e.target.value)
                         }
-                        className="h-11 w-16 text-center text-base"
+                        className="h-8 w-14 text-center text-sm"
                         aria-label="Unidades"
                       />
                     </div>
