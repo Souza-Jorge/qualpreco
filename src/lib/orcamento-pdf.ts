@@ -199,23 +199,38 @@ export async function gerarOrcamentoPdf(
     doc.text(linhas, margem, depois + 5.5);
   }
 
-  // ---------- Rodapé ----------
+  // ---------- Rodapé (papel timbrado) ----------
   const total = doc.getNumberOfPages();
+  const centro = larguraPagina / 2;
   for (let p = 1; p <= total; p++) {
     doc.setPage(p);
-    doc.setDrawColor(220);
-    doc.line(margem, alturaPagina - 14, larguraPagina - margem, alturaPagina - 14);
+
+    const base = alturaPagina - 28;
+    doc.setDrawColor(80);
+    doc.setLineWidth(0.4);
+    doc.line(margem + 20, base, larguraPagina - margem - 20, base);
+    doc.setLineWidth(0.2);
+
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0);
+    doc.setFontSize(8.5);
+    doc.text(EMPRESA, centro, base + 5, { align: "center" });
+
+    doc.setFontSize(7.5);
+    doc.text(CNPJ, margem + 26, base + 10);
+    doc.text(IE, larguraPagina - margem - 26, base + 10, { align: "right" });
+    doc.text(ENDERECO, centro, base + 15, { align: "center" });
+    doc.text(TELEFONES, centro, base + 20, { align: "center" });
+
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(120);
+    doc.setFontSize(7);
+    doc.setTextColor(130);
     doc.text(
-      `${EMPRESA} — ${fmtNumero(orc.numero)} — ${fmtData(orc.created_at)}`,
-      margem,
-      alturaPagina - 9
+      `${fmtNumero(orc.numero)} — ${fmtData(orc.created_at)}   |   Página ${p} de ${total}`,
+      larguraPagina - margem,
+      base - 2,
+      { align: "right" }
     );
-    doc.text(`Página ${p} de ${total}`, larguraPagina - margem, alturaPagina - 9, {
-      align: "right",
-    });
     doc.setTextColor(0);
   }
 
