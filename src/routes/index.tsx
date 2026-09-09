@@ -298,14 +298,14 @@ function Index() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-background">
       <div className="sticky top-0 z-30 border-b border-border/50 bg-primary shadow-md">
-        <header className="mx-auto w-full max-w-3xl px-4 pb-3 pt-6 text-primary-foreground">
-          <div className="flex min-w-0 items-center gap-3">
+        <header className="mx-auto w-full max-w-3xl px-2 pb-3 pt-6 text-primary-foreground sm:px-4">
+          <div className="flex min-w-0 items-center gap-4">
             <img
               src={logoXapadao.url}
               alt="Xapadão Bebidas"
               className="h-11 w-24 shrink-0 object-contain object-left sm:h-14 sm:w-32"
             />
-            <h1 className="min-w-0 text-lg font-bold leading-tight sm:text-xl md:text-2xl">
+            <h1 className="min-w-0 border-l border-primary-foreground/30 pl-4 text-lg font-bold leading-tight sm:text-xl md:text-2xl">
               Consulta de Preços e Orçamentos
             </h1>
           </div>
