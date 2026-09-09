@@ -304,7 +304,7 @@ export function OrcamentoEditor({
                         </label>
                         <Input
                           id={`cx-${i.key}`}
-                          value={i.caixas ? String(i.caixas) : ""}
+                          value={String(i.caixas ?? 0)}
                           disabled={bloqueado}
                           inputMode="numeric"
                           placeholder="0"
