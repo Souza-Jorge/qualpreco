@@ -1,12 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft,
   Check,
   Loader2,
   Save,
+  Search,
   Trash2,
   User,
+  UserPlus,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Produto } from "@/integrations/supabase/client";
@@ -24,6 +27,11 @@ import {
   type ItemLocal,
   type OrcamentoStatus,
 } from "@/lib/orcamentos";
+import {
+  buscarClientes,
+  criarCliente,
+  type Cliente,
+} from "@/lib/clientes";
 
 import { BuscaProdutos } from "@/components/BuscaProdutos";
 import { Input } from "@/components/ui/input";
@@ -49,6 +57,11 @@ export function OrcamentoEditor({
   const [numero, setNumero] = useState<number | null>(null);
   const [status, setStatus] = useState<OrcamentoStatus>("Rascunho");
   const [mostrarCliente, setMostrarCliente] = useState(false);
+  const [clienteBusca, setClienteBusca] = useState("");
+  const [clienteResultados, setClienteResultados] = useState<Cliente[]>([]);
+  const [clienteBuscando, setClienteBuscando] = useState(false);
+  const [salvandoCliente, setSalvandoCliente] = useState(false);
+  const clienteReqRef = useRef(0);
 
   useEffect(() => {
     if (!orcamentoId) return;
@@ -84,6 +97,67 @@ export function OrcamentoEditor({
       ativo = false;
     };
   }, [orcamentoId]);
+
+  // Busca de clientes cadastrados (debounce)
+  useEffect(() => {
+    const q = clienteBusca.trim();
+    if (q.length < 2) {
+      setClienteResultados([]);
+      setClienteBuscando(false);
+      return;
+    }
+    setClienteBuscando(true);
+    const t = setTimeout(async () => {
+      const reqId = ++clienteReqRef.current;
+      try {
+        const lista = await buscarClientes(q);
+        if (reqId === clienteReqRef.current) setClienteResultados(lista);
+      } catch {
+        if (reqId === clienteReqRef.current) setClienteResultados([]);
+      } finally {
+        if (reqId === clienteReqRef.current) setClienteBuscando(false);
+      }
+    }, 350);
+    return () => clearTimeout(t);
+  }, [clienteBusca]);
+
+  const selecionarCliente = (c: Cliente) => {
+    setCliente((prev) => ({
+      ...prev,
+      cliente_nome: c.nome ?? "",
+      cliente_empresa: c.empresa ?? "",
+      cliente_cpf_cnpj: c.cpf_cnpj ?? "",
+      cliente_telefone: c.telefone ?? "",
+      cliente_email: c.email ?? "",
+    }));
+    setClienteBusca("");
+    setClienteResultados([]);
+  };
+
+  // Cadastro rápido: salva os dados do formulário como novo cliente
+  const salvarNovoCliente = async () => {
+    if (salvandoCliente) return;
+    const nome = cliente.cliente_nome.trim();
+    if (!nome) {
+      toast.error("Informe o nome do cliente para cadastrar.");
+      return;
+    }
+    setSalvandoCliente(true);
+    try {
+      await criarCliente(userId, {
+        nome,
+        empresa: cliente.cliente_empresa,
+        cpf_cnpj: cliente.cliente_cpf_cnpj,
+        telefone: cliente.cliente_telefone,
+        email: cliente.cliente_email,
+      });
+      toast.success("Cliente cadastrado.");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Não foi possível cadastrar o cliente.");
+    } finally {
+      setSalvandoCliente(false);
+    }
+  };
 
   const desconto = useMemo(() => {
     const n = parseFloat(descontoTxt.replace(",", "."));
@@ -215,6 +289,63 @@ export function OrcamentoEditor({
         </button>
         {mostrarCliente && (
           <div className="space-y-2 border-t px-4 py-3">
+            {!bloqueado && (
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={clienteBusca}
+                  onChange={(e) => setClienteBusca(e.target.value)}
+                  placeholder="Buscar cliente cadastrado..."
+                  inputMode="search"
+                  className="h-12 pl-10 pr-10 text-base"
+                  aria-label="Buscar cliente cadastrado"
+                />
+                {clienteBuscando ? (
+                  <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+                ) : clienteBusca ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setClienteBusca("");
+                      setClienteResultados([]);
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-muted-foreground hover:bg-accent"
+                    aria-label="Limpar busca de cliente"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                ) : null}
+                {clienteResultados.length > 0 && (
+                  <Card className="absolute inset-x-0 top-full z-20 mt-1 max-h-56 divide-y overflow-y-auto shadow-lg">
+                    {clienteResultados.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => selecionarCliente(c)}
+                        className="w-full px-3 py-2.5 text-left transition-colors hover:bg-accent active:bg-accent"
+                      >
+                        <div className="truncate text-sm font-medium">
+                          {c.nome}
+                          {c.empresa ? (
+                            <span className="text-muted-foreground">
+                              {" "}
+                              · {c.empresa}
+                            </span>
+                          ) : null}
+                        </div>
+                        {(c.telefone || c.cpf_cnpj) && (
+                          <div className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                            {[c.telefone, c.cpf_cnpj]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </Card>
+                )}
+              </div>
+            )}
             {(
               [
                 ["cliente_nome", "Nome", "text"],
@@ -236,6 +367,22 @@ export function OrcamentoEditor({
                 className="h-12 text-base"
               />
             ))}
+            {!bloqueado && (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={salvarNovoCliente}
+                disabled={salvandoCliente}
+                className="h-11 w-full gap-2 text-sm font-semibold"
+              >
+                {salvandoCliente ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <UserPlus className="h-4 w-4" />
+                )}
+                Cadastrar como novo cliente
+              </Button>
+            )}
             <Textarea
               value={cliente.observacao}
               disabled={bloqueado}
