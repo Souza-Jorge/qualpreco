@@ -292,7 +292,7 @@ function Index() {
       <div className="sticky top-0 z-30 border-b border-border/50 bg-primary shadow-md">
         <header className="mx-auto w-full max-w-3xl px-4 pb-3 pt-6 text-primary-foreground">
           <h1 className="text-xl font-bold leading-tight md:text-2xl">
-            Consulta de Preços
+            Consulta de Preços e Orçamentos
           </h1>
           <p className="text-xs opacity-80 md:text-sm">
             Busque por código, nome ou escaneie o código de barras
