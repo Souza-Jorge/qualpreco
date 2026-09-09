@@ -11,10 +11,10 @@ group by 1, 2
 order by total desc;
 
 -- 2) Passar todos os clientes para a conta usada no app.
---    Troque o e-mail abaixo pelo e-mail com que você entra no QualPreço.
+--    Este é o ID da conta que está conectada no QualPreço.
 update public.clientes
-set user_id = (select id from auth.users where email = 'SEU-EMAIL-AQUI')
-where user_id is distinct from (select id from auth.users where email = 'SEU-EMAIL-AQUI');
+set user_id = 'ff9ab6e6-0bfa-45e0-a771-75cc4540356f'::uuid
+where user_id is distinct from 'ff9ab6e6-0bfa-45e0-a771-75cc4540356f'::uuid;
 
 -- 3) Conferência final (deve mostrar todos na sua conta)
 select u.email, count(*) as total
