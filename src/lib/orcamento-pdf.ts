@@ -186,7 +186,7 @@ export async function gerarOrcamentoPdf(
   // ---------- Observação ----------
   const obs = (orc.observacao ?? "").trim();
   if (obs.length > 0) {
-    if (depois > alturaPagina - 40) {
+    if (depois > alturaPagina - 54) {
       doc.addPage();
       depois = margem;
     }
