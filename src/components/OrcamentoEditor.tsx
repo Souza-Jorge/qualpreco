@@ -339,13 +339,13 @@ export function OrcamentoEditor({
                     <span className="text-xs text-muted-foreground">
                       × {fmtBRL(i.preco_unitario)} / UN
                     </span>
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {fmtQuantidade(i.quantidade, i.quantidade_por_caixa)}
+                    </span>
                   </div>
                   <span className="text-base font-bold text-primary">
                     {fmtBRL(subtotalItem(i))}
                   </span>
-                </div>
-                <div className="text-xs font-medium text-muted-foreground">
-                  {fmtQuantidade(i.quantidade, i.quantidade_por_caixa)}
                 </div>
               </div>
 
