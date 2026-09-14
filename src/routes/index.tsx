@@ -465,7 +465,7 @@ function Index() {
                         </span>
                       )}
                       {promoAtiva && (
-                        <span className="shrink-0 text-[10px] font-medium text-destructive">
+                        <span className="shrink-0 text-sm font-medium text-destructive">
                           até {fmtDateList(p.promo_end)}
                         </span>
                       )}
