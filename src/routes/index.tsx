@@ -74,7 +74,7 @@ function Index() {
   const [error, setError] = useState<string | null>(null);
   const [scanOpen, setScanOpen] = useState(false);
   const [history, setHistory] = useState<HistItem[]>([]);
-  const [homeProms, setHomeProms] = useState<Produto[] | null>(null);
+  
   // Filtro de ofertas vem da URL (?ofertas=true) em vez de estado local.
   const { ofertas } = Route.useSearch();
   const ofertasRef = useRef(ofertas);
