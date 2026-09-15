@@ -89,7 +89,7 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isHome}>
-                  <Link to="/" search={{ ofertas: false }} className="flex items-center gap-2" onClick={limparTela}>
+                  <Link to="/" search={{ ofertas: false }} className="flex items-center gap-2 text-[13px]" onClick={limparTela}>
                     <Search className="h-4 w-4" />
                     {!collapsed && <span>Consultar preços</span>}
                   </Link>
@@ -100,7 +100,7 @@ export function AppSidebar() {
                   <Link
                     to="/"
                     search={{ ofertas: !ofertasAtivas }}
-                    className="flex items-center gap-2" onClick={fecharNoMobile}
+                    className="flex items-center gap-2 text-[13px]" onClick={fecharNoMobile}
                   >
                     <Percent className="h-4 w-4" />
                     {!collapsed && <span>Apenas ofertas</span>}
@@ -117,7 +117,7 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isOrcamentos}>
-                  <Link to="/orcamentos" className="flex items-center gap-2" onClick={fecharNoMobile}>
+                  <Link to="/orcamentos" className="flex items-center gap-2 text-[13px]" onClick={fecharNoMobile}>
                     <FileText className="h-4 w-4" />
                     {!collapsed && <span>Listar orçamentos</span>}
                   </Link>
@@ -125,7 +125,7 @@ export function AppSidebar() {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isNovoOrcamento}>
-                  <Link to="/orcamentos/novo" className="flex items-center gap-2" onClick={fecharNoMobile}>
+                  <Link to="/orcamentos/novo" className="flex items-center gap-2 text-[13px]" onClick={fecharNoMobile}>
                     <Plus className="h-4 w-4" />
                     {!collapsed && <span>Novo orçamento</span>}
                   </Link>
@@ -139,13 +139,13 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             {logado ? (
-              <SidebarMenuButton onClick={sair} className="flex items-center gap-2">
+              <SidebarMenuButton onClick={sair} className="flex items-center gap-2 text-[13px]">
                 <LogOut className="h-4 w-4" />
                 {!collapsed && <span>Sair da conta</span>}
               </SidebarMenuButton>
             ) : (
               <SidebarMenuButton asChild>
-                <Link to="/orcamentos" className="flex items-center gap-2" onClick={fecharNoMobile}>
+                <Link to="/orcamentos" className="flex items-center gap-2 text-[13px]" onClick={fecharNoMobile}>
                   <LogIn className="h-4 w-4" />
                   {!collapsed && <span>Entrar</span>}
                 </Link>
@@ -153,7 +153,7 @@ export function AppSidebar() {
             )}
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={fecharApp} className="flex items-center gap-2">
+            <SidebarMenuButton onClick={fecharApp} className="flex items-center gap-2 text-[13px]">
               <Power className="h-4 w-4" />
               {!collapsed && <span>Fechar app</span>}
             </SidebarMenuButton>
