@@ -70,12 +70,12 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border px-3 py-3">
+      <SidebarHeader className="border-b border-sidebar-border px-2 py-1.5">
         <div className="flex items-center justify-center">
           <img
             src={logoXapadao.url}
             alt="Xapadão Bebidas"
-            className={collapsed ? "h-8 w-auto" : "h-11 w-24 object-contain sm:w-28"}
+            className={collapsed ? "h-6 w-auto" : "h-7 w-auto object-contain"}
           />
         </div>
       </SidebarHeader>
