@@ -28,7 +28,7 @@ import { BarcodeScanner } from "@/components/BarcodeScanner";
 
 export const Route = createFileRoute("/")({
   validateSearch: (input: Record<string, unknown>) => ({
-    ofertas: input.ofertas === true,
+    ofertas: input.ofertas !== false,
   }),
   head: () => ({
     meta: [
