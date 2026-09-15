@@ -99,7 +99,7 @@ export function AppSidebar() {
                     className="flex items-center gap-2 text-[13px]" onClick={fecharNoMobile}
                   >
                     <Percent className="h-4 w-4" />
-                    {!collapsed && <span>Apenas ofertas</span>}
+                    {!collapsed && <span>Ofertas</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
