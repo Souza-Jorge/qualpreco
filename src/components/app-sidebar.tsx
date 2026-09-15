@@ -1,9 +1,11 @@
 import { Link, useRouterState, useSearch } from "@tanstack/react-router";
-import { Search, Percent, FileText, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Search, Percent, FileText, Plus, LogIn, LogOut, Power } from "lucide-react";
 
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -14,6 +16,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import logoXapadao from "@/assets/logo-xapadao-header.webp.asset.json";
+import { supabase } from "@/integrations/supabase/client";
 
 export function AppSidebar() {
   const { state, isMobile, setOpenMobile } = useSidebar();
@@ -21,6 +24,37 @@ export function AppSidebar() {
   // No mobile, fecha o menu deslizante depois de escolher um item.
   const fecharNoMobile = () => {
     if (isMobile) setOpenMobile(false);
+  };
+
+  // Sessão do usuário (para mostrar Entrar ou Sair).
+  const [logado, setLogado] = useState(false);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setLogado(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) =>
+      setLogado(!!session)
+    );
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  const sair = async () => {
+    fecharNoMobile();
+    await supabase.auth.signOut();
+  };
+
+  const fecharApp = async () => {
+    fecharNoMobile();
+    try {
+      const { App } = await import("@capacitor/app");
+      await App.exitApp();
+    } catch {
+      window.close();
+    }
+  };
+
+  // Limpa a tela inicial ao escolher "Consultar preços".
+  const limparTela = () => {
+    fecharNoMobile();
+    window.dispatchEvent(new CustomEvent("qualpreco:limpar"));
   };
 
   const pathname = useRouterState({
@@ -36,12 +70,12 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border px-3 py-3">
+      <SidebarHeader className="border-b border-sidebar-border px-2 py-1.5">
         <div className="flex items-center justify-center">
           <img
             src={logoXapadao.url}
             alt="Xapadão Bebidas"
-            className={collapsed ? "h-8 w-auto" : "h-11 w-24 object-contain sm:w-28"}
+            className={collapsed ? "h-6 w-auto" : "h-7 w-auto object-contain"}
           />
         </div>
       </SidebarHeader>
@@ -52,7 +86,7 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isHome}>
-                  <Link to="/" search={{ ofertas: false }} className="flex items-center gap-2" onClick={fecharNoMobile}>
+                  <Link to="/" search={{ ofertas: false }} className="flex items-center gap-2" onClick={limparTela}>
                     <Search className="h-4 w-4" />
                     {!collapsed && <span>Consultar preços</span>}
                   </Link>
@@ -98,6 +132,31 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className="border-t border-sidebar-border">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            {logado ? (
+              <SidebarMenuButton onClick={sair} className="flex items-center gap-2">
+                <LogOut className="h-4 w-4" />
+                {!collapsed && <span>Sair da conta</span>}
+              </SidebarMenuButton>
+            ) : (
+              <SidebarMenuButton asChild>
+                <Link to="/orcamentos" className="flex items-center gap-2" onClick={fecharNoMobile}>
+                  <LogIn className="h-4 w-4" />
+                  {!collapsed && <span>Entrar</span>}
+                </Link>
+              </SidebarMenuButton>
+            )}
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={fecharApp} className="flex items-center gap-2">
+              <Power className="h-4 w-4" />
+              {!collapsed && <span>Fechar app</span>}
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }
