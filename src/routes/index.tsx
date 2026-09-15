@@ -31,13 +31,13 @@ export const Route = createFileRoute("/")({
   }),
   head: () => ({
     meta: [
-      { title: "Consulta Preços e Gere Orçamentos | QualPreço" },
+      { title: "Consulta Preços e Gera Orçamentos | QualPreço" },
       {
         name: "description",
         content:
           "Consulta rápida de preços por código, nome ou leitura de código de barras.",
       },
-      { property: "og:title", content: "Consulta Preços e Gere Orçamentos | QualPreço" },
+      { property: "og:title", content: "Consulta Preços e Gera Orçamentos | QualPreço" },
       {
         property: "og:description",
         content: "Consulte preços e crie orçamentos com rapidez no QualPreço.",
@@ -324,7 +324,7 @@ function Index() {
                   ref={inputRef}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Código, nome ou código de barras"
+                  placeholder="Código ou nome"
                   inputMode="search"
                   enterKeyHint="search"
                   autoFocus
