@@ -309,7 +309,7 @@ function Index() {
           <div className="flex min-w-0 items-center gap-3">
             <SidebarTrigger className="text-primary-foreground hover:bg-primary-foreground/10" />
             <h1 className="min-w-0 pl-1 text-lg font-bold leading-tight sm:text-xl md:text-2xl">
-              Consulta Preços e Gere Orçamentos
+              Consulta Preços e Gera Orçamentos
             </h1>
           </div>
           <p className="text-xs opacity-80 md:text-sm">
