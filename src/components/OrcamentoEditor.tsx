@@ -49,7 +49,7 @@ export function OrcamentoEditor({
   const navigate = useNavigate();
   const [cliente, setCliente] = useState<ClienteForm>(clienteVazio);
   const [itens, setItens] = useState<ItemLocal[]>([]);
-  const [descontoTxt, setDescontoTxt] = useState("0");
+  const [descontoTxt, setDescontoTxt] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [carregando, setCarregando] = useState(!!orcamentoId);
   const [erro, setErro] = useState<string | null>(null);
@@ -101,7 +101,8 @@ export function OrcamentoEditor({
           observacao: o.observacao ?? "",
         });
         setItens(r.itens);
-        setDescontoTxt(String(Number(o.desconto ?? 0)));
+        const d = Number(o.desconto ?? 0);
+        setDescontoTxt(d > 0 ? d.toFixed(2).replace(".", ",") : "");
       } catch (e: any) {
         if (ativo) setErro(e?.message ?? "Erro ao carregar o orçamento.");
       } finally {
@@ -541,6 +542,8 @@ export function OrcamentoEditor({
             value={descontoTxt}
             disabled={bloqueado}
             inputMode="decimal"
+            placeholder="0,00"
+            onFocus={(e) => e.currentTarget.select()}
             onChange={(e) => {
               setOk(false);
               setDescontoTxt(e.target.value);
