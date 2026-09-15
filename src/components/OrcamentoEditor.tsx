@@ -536,7 +536,7 @@ export function OrcamentoEditor({
           <span className="font-medium">{fmtBRL(totais.subtotal)}</span>
         </div>
         <div className="flex items-center justify-between gap-3 text-sm">
-          <span className="text-muted-foreground">Desconto</span>
+          <span className="text-muted-foreground">Desconto R$</span>
           <Input
             value={descontoTxt}
             disabled={bloqueado}
