@@ -74,8 +74,11 @@ function Index() {
   const [error, setError] = useState<string | null>(null);
   const [scanOpen, setScanOpen] = useState(false);
   const [history, setHistory] = useState<HistItem[]>([]);
-  const [onlyPromo, setOnlyPromo] = useState(false);
-  const onlyPromoRef = useRef(false);
+  // Filtro de ofertas vem da URL (?ofertas=true) em vez de estado local.
+  const { ofertas } = Route.useSearch();
+  const ofertasRef = useRef(ofertas);
+  ofertasRef.current = ofertas;
+  const navigate = useNavigate({ from: "/" });
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
