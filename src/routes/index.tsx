@@ -23,7 +23,7 @@ import { Card } from "@/components/ui/card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ProdutoCard } from "@/components/ProdutoCard";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
-import logoXapadao from "@/assets/logo-xapadao-header.webp.asset.json";
+
 
 export const Route = createFileRoute("/")({
   validateSearch: (input: Record<string, unknown>) => ({
