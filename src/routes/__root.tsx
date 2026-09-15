@@ -11,6 +11,8 @@ import {
 import { Toaster } from "@/components/ui/sonner";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { MobileNav } from "@/components/mobile-nav";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 import appCss from "../styles.css?url";
 
