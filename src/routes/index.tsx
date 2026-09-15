@@ -515,7 +515,7 @@ function Index() {
         )}
 
 
-        {!query && !loading && history.length === 0 && (
+        {!query && !loading && !ofertas && history.length === 0 && (
           <Card className="flex flex-col items-center gap-2 p-8 text-center">
             <Search className="h-10 w-10 text-muted-foreground" />
             <p className="text-sm font-medium">Comece uma consulta</p>
@@ -526,7 +526,7 @@ function Index() {
           </Card>
         )}
 
-        {!query && !loading && history.length > 0 && (
+        {!query && !loading && !ofertas && history.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
               <History className="h-4 w-4" />
@@ -549,70 +549,6 @@ function Index() {
           </div>
         )}
 
-        {!query && !loading && !ofertas && homeProms && homeProms.length > 0 && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <Percent className="h-4 w-4" />
-              Promoções ativas hoje
-            </div>
-            <Card className="divide-y overflow-hidden">
-              {homeProms.slice(0, 10).map((p) => {
-                const preco = toNumber(p.sale_price);
-                const promo = toNumber(p.promo_price);
-                const promoAtiva = promo != null && p.promo_end != null && p.promo_end >= new Date().toLocaleDateString("en-CA");
-                const fmt = (v: number | null) =>
-                  v != null
-                    ? v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
-                    : "—";
-                return (
-                  <button
-                    key={p.codigo}
-                    onClick={() => {
-                      setSelected(p);
-                      pushHistory(p);
-                    }}
-                    className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-accent active:bg-accent"
-                  >
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="truncate text-sm font-medium">{p.name}</span>
-                        {promoAtiva && (
-                          <span className="shrink-0 rounded bg-destructive px-1.5 py-0.5 text-[10px] font-bold leading-none text-destructive-foreground">
-                            PROMO
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-0.5 text-[11px] text-muted-foreground">
-                        #{p.codigo}
-                        {p.promo_end && (
-                          <span className="ml-2 text-destructive">
-                            até {fmtDateList(p.promo_end)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex shrink-0 flex-col items-end leading-tight">
-                      <span className="text-base font-bold text-success">
-                        {fmt(promoAtiva ? promo : preco)}
-                      </span>
-                      {promoAtiva && preco != null && (
-                        <span className="text-[11px] text-muted-foreground line-through">
-                          {fmt(preco)}
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </Card>
-            <button
-              onClick={() => navigate({ to: "/", search: { ofertas: true } })}
-              className="w-full py-2 text-center text-sm font-medium text-primary hover:underline"
-            >
-              Ver todas as ofertas
-            </button>
-          </div>
-        )}
 
         <footer className="py-6 text-center text-xs text-muted-foreground">
           QualPreço · Xapadão Bebidas · v1.1.0
