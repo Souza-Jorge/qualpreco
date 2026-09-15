@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 import logoXapadao from "@/assets/logo-xapadao-header.webp.asset.json";
 import { supabase } from "@/integrations/supabase/client";
+import { fecharAplicativo, sairDaConta } from "@/lib/app-sessao";
 
 export function AppSidebar() {
   const { state, isMobile, setOpenMobile } = useSidebar();
