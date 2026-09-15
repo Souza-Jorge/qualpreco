@@ -101,7 +101,8 @@ export function OrcamentoEditor({
           observacao: o.observacao ?? "",
         });
         setItens(r.itens);
-        setDescontoTxt(String(Number(o.desconto ?? 0)));
+        const d = Number(o.desconto ?? 0);
+        setDescontoTxt(d > 0 ? d.toFixed(2).replace(".", ",") : "");
       } catch (e: any) {
         if (ativo) setErro(e?.message ?? "Erro ao carregar o orçamento.");
       } finally {
