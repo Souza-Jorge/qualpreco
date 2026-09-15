@@ -322,7 +322,7 @@ function Index() {
       <div className="sticky top-0 z-30 border-b border-border/50 bg-primary shadow-md">
         <header className="mx-auto w-full max-w-3xl px-2 pb-3 pt-6 text-primary-foreground sm:px-4">
           <div className="flex min-w-0 items-center gap-3">
-            <SidebarTrigger className="text-primary-foreground hover:bg-primary-foreground/10" />
+            <SidebarTrigger className="hidden text-primary-foreground hover:bg-primary-foreground/10 md:inline-flex" />
             <h1 className="min-w-0 pl-1 text-lg font-bold leading-tight sm:text-xl md:text-2xl">
               Consulta Preços e Gera Orçamentos
             </h1>
