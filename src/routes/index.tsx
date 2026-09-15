@@ -8,8 +8,6 @@ import {
   History,
   SearchX,
   RotateCcw,
-  Percent,
-  FileText,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toNumber, type Produto } from "@/integrations/supabase/client";
@@ -22,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ProdutoCard } from "@/components/ProdutoCard";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
 import logoXapadao from "@/assets/logo-xapadao-header.webp.asset.json";
@@ -307,7 +306,8 @@ function Index() {
     <div className="min-h-screen overflow-x-hidden bg-background">
       <div className="sticky top-0 z-30 border-b border-border/50 bg-primary shadow-md">
         <header className="mx-auto w-full max-w-3xl px-2 pb-3 pt-6 text-primary-foreground sm:px-4">
-          <div className="flex min-w-0 items-center gap-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <SidebarTrigger className="text-primary-foreground hover:bg-primary-foreground/10" />
             <img
               src={logoXapadao.url}
               alt="Xapadão Bebidas"
