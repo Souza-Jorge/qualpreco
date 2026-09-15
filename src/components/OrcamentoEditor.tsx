@@ -542,6 +542,8 @@ export function OrcamentoEditor({
             value={descontoTxt}
             disabled={bloqueado}
             inputMode="decimal"
+            placeholder="0,00"
+            onFocus={(e) => e.currentTarget.select()}
             onChange={(e) => {
               setOk(false);
               setDescontoTxt(e.target.value);
