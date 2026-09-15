@@ -359,29 +359,7 @@ function Index() {
             </div>
           </form>
 
-          <div className="mt-2 flex gap-2">
-            <button
-              type="button"
-              onClick={togglePromo}
-              className={`flex h-10 flex-1 items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors ${
-                onlyPromo
-                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 ring-1 ring-primary-foreground/30"
-              }`}
-              aria-pressed={onlyPromo}
-            >
-              <Percent className="h-4 w-4" />
-              Apenas ofertas
-            </button>
-            <Link
-              to="/orcamentos"
-              className="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-primary-foreground/10 text-sm font-semibold text-primary-foreground ring-1 ring-primary-foreground/30 transition-colors hover:bg-primary-foreground/20"
-            >
-              <FileText className="h-4 w-4" />
-              Orçamentos
-            </Link>
-          </div>
-        </header>
+         </header>
       </div>
 
       <main className="mx-auto w-full max-w-3xl space-y-4 px-4 py-4">
@@ -438,7 +416,7 @@ function Index() {
         {showResultsList && !loading && (
           <Card className="max-h-[70vh] divide-y overflow-y-auto">
             <div className="sticky top-0 z-10 bg-card px-3 py-2 text-xs font-medium text-muted-foreground">
-              {results.length} {onlyPromo ? "produtos em oferta" : "produtos encontrados"}
+              {results.length} {ofertas ? "produtos em oferta" : "produtos encontrados"}
             </div>
             {results.map((p) => {
               const preco = toNumber(p.sale_price);
