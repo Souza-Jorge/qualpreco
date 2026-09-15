@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ScanLine,
@@ -8,8 +8,6 @@ import {
   History,
   SearchX,
   RotateCcw,
-  Percent,
-  FileText,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toNumber, type Produto } from "@/integrations/supabase/client";
@@ -22,11 +20,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ProdutoCard } from "@/components/ProdutoCard";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
 import logoXapadao from "@/assets/logo-xapadao-header.webp.asset.json";
 
 export const Route = createFileRoute("/")({
+  validateSearch: (input: Record<string, unknown>) => ({
+    ofertas: input.ofertas === true,
+  }),
   head: () => ({
     meta: [
       { title: "Consulta Preços e Gere Orçamentos | QualPreço" },
@@ -71,8 +73,11 @@ function Index() {
   const [error, setError] = useState<string | null>(null);
   const [scanOpen, setScanOpen] = useState(false);
   const [history, setHistory] = useState<HistItem[]>([]);
-  const [onlyPromo, setOnlyPromo] = useState(false);
-  const onlyPromoRef = useRef(false);
+  // Filtro de ofertas vem da URL (?ofertas=true) em vez de estado local.
+  const { ofertas } = Route.useSearch();
+  const ofertasRef = useRef(ofertas);
+  ofertasRef.current = ofertas;
+  const navigate = useNavigate({ from: "/" });
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -171,7 +176,7 @@ function Index() {
     const stale = () => reqId !== reqIdRef.current;
     setLoading(true);
     try {
-      const list = await buscarProdutos(q, { onlyPromo: onlyPromoRef.current });
+      const list = await buscarProdutos(q, { onlyPromo: ofertasRef.current });
       if (stale()) return;
       if (list.length === 1) {
         setSelected(list[0]);
@@ -185,7 +190,7 @@ function Index() {
         setResults([]);
         const alvo = isNumeric(q) ? `com o código "${q}"` : `para "${q}"`;
         setError(
-          onlyPromoRef.current
+          ofertasRef.current
             ? `Nenhum produto em oferta encontrado ${alvo}.`
             : `Nenhum produto encontrado ${alvo}.`
         );
@@ -202,16 +207,17 @@ function Index() {
   };
 
   const togglePromo = () => {
-    const next = !onlyPromo;
-    onlyPromoRef.current = next;
-    setOnlyPromo(next);
+    // Alterna o filtro de ofertas via parâmetro de busca na URL.
+    navigate({ to: "/", search: { ofertas: !ofertas } });
+  };
+
+  // Reage à mudança do filtro de ofertas (via URL) re-executando a busca.
+  useEffect(() => {
     const q = query.trim();
-    if (next) {
-      // Ativando: se há query, re-busca com filtro; senão lista todas as ofertas
+    if (ofertas) {
       if (q.length >= 2) runSearch(q);
       else runListarPromocoes();
     } else {
-      // Desativando: se há query, re-busca sem filtro; senão limpa
       if (q.length >= 2) runSearch(q);
       else {
         setResults([]);
@@ -219,7 +225,8 @@ function Index() {
         setError(null);
       }
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ofertas]);
 
   const runListarPromocoes = async () => {
     const reqId = ++reqIdRef.current;
@@ -259,7 +266,7 @@ function Index() {
     setQuery("");
     setSelected(null);
     setError(null);
-    if (onlyPromoRef.current) {
+    if (ofertasRef.current) {
       runListarPromocoes();
     } else {
       setResults([]);
@@ -299,7 +306,8 @@ function Index() {
     <div className="min-h-screen overflow-x-hidden bg-background">
       <div className="sticky top-0 z-30 border-b border-border/50 bg-primary shadow-md">
         <header className="mx-auto w-full max-w-3xl px-2 pb-3 pt-6 text-primary-foreground sm:px-4">
-          <div className="flex min-w-0 items-center gap-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <SidebarTrigger className="text-primary-foreground hover:bg-primary-foreground/10" />
             <img
               src={logoXapadao.url}
               alt="Xapadão Bebidas"
@@ -351,29 +359,7 @@ function Index() {
             </div>
           </form>
 
-          <div className="mt-2 flex gap-2">
-            <button
-              type="button"
-              onClick={togglePromo}
-              className={`flex h-10 flex-1 items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors ${
-                onlyPromo
-                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 ring-1 ring-primary-foreground/30"
-              }`}
-              aria-pressed={onlyPromo}
-            >
-              <Percent className="h-4 w-4" />
-              Apenas ofertas
-            </button>
-            <Link
-              to="/orcamentos"
-              className="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-primary-foreground/10 text-sm font-semibold text-primary-foreground ring-1 ring-primary-foreground/30 transition-colors hover:bg-primary-foreground/20"
-            >
-              <FileText className="h-4 w-4" />
-              Orçamentos
-            </Link>
-          </div>
-        </header>
+         </header>
       </div>
 
       <main className="mx-auto w-full max-w-3xl space-y-4 px-4 py-4">
@@ -430,7 +416,7 @@ function Index() {
         {showResultsList && !loading && (
           <Card className="max-h-[70vh] divide-y overflow-y-auto">
             <div className="sticky top-0 z-10 bg-card px-3 py-2 text-xs font-medium text-muted-foreground">
-              {results.length} {onlyPromo ? "produtos em oferta" : "produtos encontrados"}
+              {results.length} {ofertas ? "produtos em oferta" : "produtos encontrados"}
             </div>
             {results.map((p) => {
               const preco = toNumber(p.sale_price);
