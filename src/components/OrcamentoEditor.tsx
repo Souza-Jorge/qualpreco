@@ -477,10 +477,11 @@ export function OrcamentoEditor({
                         </label>
                         <Input
                           id={`cx-${i.key}`}
-                          value={String(i.caixas ?? 0)}
+                          value={i.caixas ? String(i.caixas) : ""}
                           disabled={bloqueado}
                           inputMode="numeric"
                           placeholder="0"
+                          onFocus={(e) => e.currentTarget.select()}
                           onChange={(e) =>
                             setQtdCampo(i.key, "caixas", e.target.value)
                           }
@@ -498,10 +499,11 @@ export function OrcamentoEditor({
                       </label>
                       <Input
                         id={`un-${i.key}`}
-                        value={String(i.unidades ?? 0)}
+                        value={i.unidades ? String(i.unidades) : ""}
                         disabled={bloqueado}
                         inputMode="numeric"
                         placeholder="0"
+                        onFocus={(e) => e.currentTarget.select()}
                         onChange={(e) =>
                           setQtdCampo(i.key, "unidades", e.target.value)
                         }
