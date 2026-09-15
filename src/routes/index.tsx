@@ -29,13 +29,13 @@ import logoXapadao from "@/assets/logo-xapadao-header.webp.asset.json";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Consulta de Preços e Orçamentos | QualPreço" },
+      { title: "Consulta Preços e Gere Orçamentos | QualPreço" },
       {
         name: "description",
         content:
           "Consulta rápida de preços por código, nome ou leitura de código de barras.",
       },
-      { property: "og:title", content: "Consulta de Preços e Orçamentos | QualPreço" },
+      { property: "og:title", content: "Consulta Preços e Gere Orçamentos | QualPreço" },
       {
         property: "og:description",
         content: "Consulte preços e crie orçamentos com rapidez no QualPreço.",
