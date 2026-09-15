@@ -1,9 +1,11 @@
 import { Link, useRouterState, useSearch } from "@tanstack/react-router";
-import { Search, Percent, FileText, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Search, Percent, FileText, Plus, LogIn, LogOut, Power } from "lucide-react";
 
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -14,6 +16,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import logoXapadao from "@/assets/logo-xapadao-header.webp.asset.json";
+import { supabase } from "@/integrations/supabase/client";
 
 export function AppSidebar() {
   const { state, isMobile, setOpenMobile } = useSidebar();
@@ -21,6 +24,37 @@ export function AppSidebar() {
   // No mobile, fecha o menu deslizante depois de escolher um item.
   const fecharNoMobile = () => {
     if (isMobile) setOpenMobile(false);
+  };
+
+  // Sessão do usuário (para mostrar Entrar ou Sair).
+  const [logado, setLogado] = useState(false);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setLogado(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) =>
+      setLogado(!!session)
+    );
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  const sair = async () => {
+    fecharNoMobile();
+    await supabase.auth.signOut();
+  };
+
+  const fecharApp = async () => {
+    fecharNoMobile();
+    try {
+      const { App } = await import("@capacitor/app");
+      await App.exitApp();
+    } catch {
+      window.close();
+    }
+  };
+
+  // Limpa a tela inicial ao escolher "Consultar preços".
+  const limparTela = () => {
+    fecharNoMobile();
+    window.dispatchEvent(new CustomEvent("qualpreco:limpar"));
   };
 
   const pathname = useRouterState({
