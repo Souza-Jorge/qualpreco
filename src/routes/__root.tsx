@@ -77,6 +77,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      // App interno: não deve ser indexado por buscadores.
+      {
+        name: "robots",
+        content: "noindex, nofollow, noarchive, nosnippet, noimageindex",
+      },
+      { name: "googlebot", content: "noindex, nofollow" },
       { title: "QualPreço — Xapadão Bebidas" },
       {
         name: "description",
