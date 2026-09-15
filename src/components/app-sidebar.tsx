@@ -69,18 +69,17 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border px-2 py-1.5">
+      <SidebarHeader className="border-b border-sidebar-border px-1 py-1.5">
         <div className="flex items-center justify-center">
           <img
             src={logoXapadao.url}
             alt="Xapadão Bebidas"
-            className={collapsed ? "h-7 w-auto" : "h-9 w-auto object-contain"}
+            className={collapsed ? "h-9 w-auto" : "h-14 w-auto object-contain"}
           />
         </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
