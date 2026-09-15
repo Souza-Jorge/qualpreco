@@ -49,7 +49,7 @@ export function OrcamentoEditor({
   const navigate = useNavigate();
   const [cliente, setCliente] = useState<ClienteForm>(clienteVazio);
   const [itens, setItens] = useState<ItemLocal[]>([]);
-  const [descontoTxt, setDescontoTxt] = useState("0");
+  const [descontoTxt, setDescontoTxt] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [carregando, setCarregando] = useState(!!orcamentoId);
   const [erro, setErro] = useState<string | null>(null);
