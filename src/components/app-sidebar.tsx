@@ -16,8 +16,13 @@ import {
 import logoXapadao from "@/assets/logo-xapadao-header.webp.asset.json";
 
 export function AppSidebar() {
-  const { state } = useSidebar();
-  const collapsed = state === "collapsed";
+  const { state, isMobile, setOpenMobile } = useSidebar();
+  const collapsed = state === "collapsed" && !isMobile;
+  // No mobile, fecha o menu deslizante depois de escolher um item.
+  const fecharNoMobile = () => {
+    if (isMobile) setOpenMobile(false);
+  };
+
   const pathname = useRouterState({
     select: (router) => router.location.pathname,
   });
@@ -47,7 +52,7 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isHome}>
-                  <Link to="/" search={{ ofertas: false }} className="flex items-center gap-2">
+                  <Link to="/" search={{ ofertas: false }} className="flex items-center gap-2" onClick={fecharNoMobile}>
                     <Search className="h-4 w-4" />
                     {!collapsed && <span>Consultar preços</span>}
                   </Link>
@@ -58,7 +63,7 @@ export function AppSidebar() {
                   <Link
                     to="/"
                     search={{ ofertas: !ofertasAtivas }}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2" onClick={fecharNoMobile}
                   >
                     <Percent className="h-4 w-4" />
                     {!collapsed && <span>Apenas ofertas</span>}
@@ -75,7 +80,7 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isOrcamentos}>
-                  <Link to="/orcamentos" className="flex items-center gap-2">
+                  <Link to="/orcamentos" className="flex items-center gap-2" onClick={fecharNoMobile}>
                     <FileText className="h-4 w-4" />
                     {!collapsed && <span>Listar orçamentos</span>}
                   </Link>
@@ -83,7 +88,7 @@ export function AppSidebar() {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isNovoOrcamento}>
-                  <Link to="/orcamentos/novo" className="flex items-center gap-2">
+                  <Link to="/orcamentos/novo" className="flex items-center gap-2" onClick={fecharNoMobile}>
                     <Plus className="h-4 w-4" />
                     {!collapsed && <span>Novo orçamento</span>}
                   </Link>
