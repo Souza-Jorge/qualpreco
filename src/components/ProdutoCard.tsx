@@ -1,7 +1,9 @@
+import { useNavigate } from "@tanstack/react-router";
 import { toNumber, type Produto } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Package, Tag, Barcode } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, Package, Tag, Barcode, FilePlus, Share2 } from "lucide-react";
 
 const brl = (v: number | null | undefined) =>
   v == null
@@ -42,6 +44,7 @@ const daysUntil = (d: string | null) => {
 };
 
 export function ProdutoCard({ produto }: { produto: Produto }) {
+  const navigate = useNavigate();
   const precoVenda = toNumber(produto.sale_price);
   const precoPromo = toNumber(produto.promo_price);
   const precoCusto = toNumber(produto.cost_price);
@@ -70,6 +73,32 @@ export function ProdutoCard({ produto }: { produto: Produto }) {
 
   const estoque = produto.stock_quantity ?? 0;
   const semEstoque = estoque <= 0;
+
+  const adicionarAoOrcamento = () => {
+    try {
+      sessionStorage.setItem(
+        "qualpreco:produto-orcamento",
+        JSON.stringify(produto)
+      );
+    } catch {}
+    navigate({ to: "/orcamentos/novo" });
+  };
+
+  const compartilhar = async () => {
+    const texto = `${produto.name} — ${brl(precoFinal)}${
+      promoAtiva && precoVenda != null
+        ? ` (era ${brl(precoVenda)})`
+        : ""
+    }`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "QualPreço", text: texto });
+      } else {
+        await navigator.clipboard.writeText(texto);
+        alert("Preço copiado!");
+      }
+    } catch {}
+  };
 
   return (
     <Card className="overflow-hidden border-2">
@@ -201,6 +230,28 @@ export function ProdutoCard({ produto }: { produto: Produto }) {
                 : `Validade: ${fmtDate(produto.data_validade)}`}
             </Badge>
           )}
+        </div>
+
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="default"
+            className="h-11 flex-1 gap-2 text-sm font-semibold"
+            onClick={adicionarAoOrcamento}
+          >
+            <FilePlus className="h-4 w-4" />
+            Adicionar ao orçamento
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-11 shrink-0 gap-2 px-4"
+            onClick={compartilhar}
+            aria-label="Compartilhar preço"
+          >
+            <Share2 className="h-4 w-4" />
+            <span className="hidden sm:inline">Compartilhar</span>
+          </Button>
         </div>
       </div>
 
