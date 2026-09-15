@@ -584,6 +584,7 @@ export function OrcamentoHeader({ titulo }: { titulo: string }) {
       <header className="mx-auto flex w-full max-w-3xl items-center gap-3 px-4 py-4 text-primary-foreground">
         <Link
           to="/"
+          search={{ ofertas: false }}
           className="rounded-md p-2 hover:bg-primary-foreground/10"
           aria-label="Voltar"
         >
