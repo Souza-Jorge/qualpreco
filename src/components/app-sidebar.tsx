@@ -1,4 +1,4 @@
-import { Link, useRouterState, useSearch } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Search, Percent, FileText, Plus, LogIn, LogOut, Power } from "lucide-react";
 
@@ -20,6 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function AppSidebar() {
   const { state, isMobile, setOpenMobile } = useSidebar();
+  const navigate = useNavigate();
   const collapsed = state === "collapsed" && !isMobile;
   // No mobile, fecha o menu deslizante depois de escolher um item.
   const fecharNoMobile = () => {
@@ -36,9 +37,11 @@ export function AppSidebar() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  // Sai da conta (login) e volta para a tela inicial — o app NÃO fecha.
   const sair = async () => {
     fecharNoMobile();
     await supabase.auth.signOut();
+    navigate({ to: "/", search: { ofertas: true } });
   };
 
   const fecharApp = async () => {
@@ -75,7 +78,7 @@ export function AppSidebar() {
           <img
             src={logoXapadao.url}
             alt="Xapadão Bebidas"
-            className={collapsed ? "h-6 w-auto" : "h-7 w-auto object-contain"}
+            className={collapsed ? "h-7 w-auto" : "h-9 w-auto object-contain"}
           />
         </div>
       </SidebarHeader>
