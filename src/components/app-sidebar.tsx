@@ -1,4 +1,4 @@
-import { Link, useRouterState, useSearch } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Search, Percent, FileText, Plus, LogIn, LogOut, Power } from "lucide-react";
 
@@ -20,6 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function AppSidebar() {
   const { state, isMobile, setOpenMobile } = useSidebar();
+  const navigate = useNavigate();
   const collapsed = state === "collapsed" && !isMobile;
   // No mobile, fecha o menu deslizante depois de escolher um item.
   const fecharNoMobile = () => {
@@ -36,9 +37,11 @@ export function AppSidebar() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  // Sai da conta (login) e volta para a tela inicial — o app NÃO fecha.
   const sair = async () => {
     fecharNoMobile();
     await supabase.auth.signOut();
+    navigate({ to: "/", search: { ofertas: true } });
   };
 
   const fecharApp = async () => {
@@ -75,7 +78,7 @@ export function AppSidebar() {
           <img
             src={logoXapadao.url}
             alt="Xapadão Bebidas"
-            className={collapsed ? "h-6 w-auto" : "h-7 w-auto object-contain"}
+            className={collapsed ? "h-7 w-auto" : "h-9 w-auto object-contain"}
           />
         </div>
       </SidebarHeader>
@@ -86,7 +89,7 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isHome}>
-                  <Link to="/" search={{ ofertas: false }} className="flex items-center gap-2" onClick={limparTela}>
+                  <Link to="/" search={{ ofertas: false }} className="flex items-center gap-2 text-[13px]" onClick={limparTela}>
                     <Search className="h-4 w-4" />
                     {!collapsed && <span>Consultar preços</span>}
                   </Link>
@@ -97,7 +100,7 @@ export function AppSidebar() {
                   <Link
                     to="/"
                     search={{ ofertas: !ofertasAtivas }}
-                    className="flex items-center gap-2" onClick={fecharNoMobile}
+                    className="flex items-center gap-2 text-[13px]" onClick={fecharNoMobile}
                   >
                     <Percent className="h-4 w-4" />
                     {!collapsed && <span>Apenas ofertas</span>}
@@ -114,7 +117,7 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isOrcamentos}>
-                  <Link to="/orcamentos" className="flex items-center gap-2" onClick={fecharNoMobile}>
+                  <Link to="/orcamentos" className="flex items-center gap-2 text-[13px]" onClick={fecharNoMobile}>
                     <FileText className="h-4 w-4" />
                     {!collapsed && <span>Listar orçamentos</span>}
                   </Link>
@@ -122,7 +125,7 @@ export function AppSidebar() {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isNovoOrcamento}>
-                  <Link to="/orcamentos/novo" className="flex items-center gap-2" onClick={fecharNoMobile}>
+                  <Link to="/orcamentos/novo" className="flex items-center gap-2 text-[13px]" onClick={fecharNoMobile}>
                     <Plus className="h-4 w-4" />
                     {!collapsed && <span>Novo orçamento</span>}
                   </Link>
@@ -136,13 +139,13 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             {logado ? (
-              <SidebarMenuButton onClick={sair} className="flex items-center gap-2">
+              <SidebarMenuButton onClick={sair} className="flex items-center gap-2 text-[13px]">
                 <LogOut className="h-4 w-4" />
                 {!collapsed && <span>Sair da conta</span>}
               </SidebarMenuButton>
             ) : (
               <SidebarMenuButton asChild>
-                <Link to="/orcamentos" className="flex items-center gap-2" onClick={fecharNoMobile}>
+                <Link to="/orcamentos" className="flex items-center gap-2 text-[13px]" onClick={fecharNoMobile}>
                   <LogIn className="h-4 w-4" />
                   {!collapsed && <span>Entrar</span>}
                 </Link>
@@ -150,7 +153,7 @@ export function AppSidebar() {
             )}
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={fecharApp} className="flex items-center gap-2">
+            <SidebarMenuButton onClick={fecharApp} className="flex items-center gap-2 text-[13px]">
               <Power className="h-4 w-4" />
               {!collapsed && <span>Fechar app</span>}
             </SidebarMenuButton>
