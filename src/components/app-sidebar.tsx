@@ -132,6 +132,31 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className="border-t border-sidebar-border">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            {logado ? (
+              <SidebarMenuButton onClick={sair} className="flex items-center gap-2">
+                <LogOut className="h-4 w-4" />
+                {!collapsed && <span>Sair da conta</span>}
+              </SidebarMenuButton>
+            ) : (
+              <SidebarMenuButton asChild>
+                <Link to="/orcamentos" className="flex items-center gap-2" onClick={fecharNoMobile}>
+                  <LogIn className="h-4 w-4" />
+                  {!collapsed && <span>Entrar</span>}
+                </Link>
+              </SidebarMenuButton>
+            )}
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={fecharApp} className="flex items-center gap-2">
+              <Power className="h-4 w-4" />
+              {!collapsed && <span>Fechar app</span>}
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }
