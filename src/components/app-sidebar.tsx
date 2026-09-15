@@ -16,8 +16,13 @@ import {
 import logoXapadao from "@/assets/logo-xapadao-header.webp.asset.json";
 
 export function AppSidebar() {
-  const { state } = useSidebar();
-  const collapsed = state === "collapsed";
+  const { state, isMobile, setOpenMobile } = useSidebar();
+  const collapsed = state === "collapsed" && !isMobile;
+  // No mobile, fecha o menu deslizante depois de escolher um item.
+  const fecharNoMobile = () => {
+    if (isMobile) setOpenMobile(false);
+  };
+
   const pathname = useRouterState({
     select: (router) => router.location.pathname,
   });
