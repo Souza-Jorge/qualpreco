@@ -73,6 +73,7 @@ function Index() {
   const [error, setError] = useState<string | null>(null);
   const [scanOpen, setScanOpen] = useState(false);
   const [history, setHistory] = useState<HistItem[]>([]);
+  const [homeProms, setHomeProms] = useState<Produto[] | null>(null);
   // Filtro de ofertas vem da URL (?ofertas=true) em vez de estado local.
   const { ofertas } = Route.useSearch();
   const ofertasRef = useRef(ofertas);
@@ -86,6 +87,27 @@ function Index() {
       if (raw) setHistory(JSON.parse(raw));
     } catch {}
   }, []);
+
+  // Carrega promoções ativas na tela inicial quando não há busca nem filtro.
+  useEffect(() => {
+    if (query.trim() || ofertas) {
+      setHomeProms(null);
+      return;
+    }
+    let ativo = true;
+    (async () => {
+      try {
+        const list = await listarPromocoes();
+        if (ativo) setHomeProms(list);
+      } catch {
+        if (ativo) setHomeProms([]);
+      }
+    })();
+    return () => {
+      ativo = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, ofertas]);
 
   useEffect(() => {
     if (!scanOpen && !selected) inputRef.current?.focus();
