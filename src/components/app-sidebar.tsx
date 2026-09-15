@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 import logoXapadao from "@/assets/logo-xapadao-header.webp.asset.json";
 import { supabase } from "@/integrations/supabase/client";
+import { fecharAplicativo, sairDaConta } from "@/lib/app-sessao";
 
 export function AppSidebar() {
   const { state, isMobile, setOpenMobile } = useSidebar();
@@ -40,18 +41,13 @@ export function AppSidebar() {
   // Sai da conta (login) e volta para a tela inicial — o app NÃO fecha.
   const sair = async () => {
     fecharNoMobile();
-    await supabase.auth.signOut();
+    await sairDaConta();
     navigate({ to: "/", search: { ofertas: true } });
   };
 
   const fecharApp = async () => {
     fecharNoMobile();
-    try {
-      const { App } = await import("@capacitor/app");
-      await App.exitApp();
-    } catch {
-      window.close();
-    }
+    await fecharAplicativo();
   };
 
   // Limpa a tela inicial ao escolher "Consultar preços".

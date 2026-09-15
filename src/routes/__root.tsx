@@ -11,6 +11,8 @@ import {
 import { Toaster } from "@/components/ui/sonner";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { MobileNav } from "@/components/mobile-nav";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 import appCss from "../styles.css?url";
 
@@ -133,16 +135,18 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const isMobile = useIsMobile();
 
   return (
     <QueryClientProvider client={queryClient}>
       <SidebarProvider>
         <div className="flex min-h-screen w-full">
-          <AppSidebar />
-          <SidebarInset className="flex-1">
+          {!isMobile && <AppSidebar />}
+          <SidebarInset className="flex-1 pb-16 md:pb-0">
             <Outlet />
           </SidebarInset>
         </div>
+        {isMobile && <MobileNav />}
       </SidebarProvider>
       <Toaster />
     </QueryClientProvider>
