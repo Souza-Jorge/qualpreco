@@ -86,7 +86,7 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isHome}>
-                  <Link to="/" search={{ ofertas: false }} className="flex items-center gap-2" onClick={fecharNoMobile}>
+                  <Link to="/" search={{ ofertas: false }} className="flex items-center gap-2" onClick={limparTela}>
                     <Search className="h-4 w-4" />
                     {!collapsed && <span>Consultar preços</span>}
                   </Link>
