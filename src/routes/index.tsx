@@ -89,26 +89,18 @@ function Index() {
     } catch {}
   }, []);
 
-  // Carrega promoções ativas na tela inicial quando não há busca nem filtro.
+  // "Consultar preços" no menu limpa a tela inicial.
   useEffect(() => {
-    if (query.trim() || ofertas) {
-      setHomeProms(null);
-      return;
-    }
-    let ativo = true;
-    (async () => {
-      try {
-        const list = await listarPromocoes();
-        if (ativo) setHomeProms(list);
-      } catch {
-        if (ativo) setHomeProms([]);
-      }
-    })();
-    return () => {
-      ativo = false;
+    const limpar = () => {
+      setQuery("");
+      setResults([]);
+      setSelected(null);
+      setError(null);
+      inputRef.current?.focus();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, ofertas]);
+    window.addEventListener("qualpreco:limpar", limpar);
+    return () => window.removeEventListener("qualpreco:limpar", limpar);
+  }, []);
 
   useEffect(() => {
     if (!scanOpen && !selected) inputRef.current?.focus();
