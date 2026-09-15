@@ -65,6 +65,20 @@ export function OrcamentoEditor({
   const clienteReqRef = useRef(0);
 
   useEffect(() => {
+    // Produto enviado da tela de consulta ("Adicionar ao orçamento")
+    try {
+      const raw = sessionStorage.getItem("qualpreco:produto-orcamento");
+      if (raw) {
+        const p = JSON.parse(raw) as Produto;
+        addProduto(p);
+        toast.success(`${p.name} adicionado ao orçamento.`);
+      }
+    } catch {}
+    sessionStorage.removeItem("qualpreco:produto-orcamento");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     if (!orcamentoId) return;
     let ativo = true;
     (async () => {
