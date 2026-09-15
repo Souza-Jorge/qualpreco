@@ -546,7 +546,24 @@ export function OrcamentoEditor({
             onFocus={(e) => e.currentTarget.select()}
             onChange={(e) => {
               setOk(false);
-              setDescontoTxt(e.target.value);
+              // aceita apenas dígitos e uma vírgula, no máximo 2 casas decimais
+              let v = e.target.value.replace(/[^\d,]/g, "");
+              const primeiraVirgula = v.indexOf(",");
+              if (primeiraVirgula !== -1) {
+                v =
+                  v.slice(0, primeiraVirgula + 1) +
+                  v.slice(primeiraVirgula + 1).replace(/,/g, "").slice(0, 2);
+              }
+              setDescontoTxt(v);
+            }}
+            onBlur={() => {
+              setDescontoTxt((prev) => {
+                const t = prev.trim();
+                if (!t) return "";
+                const n = parseFloat(t.replace(",", "."));
+                if (Number.isNaN(n)) return "";
+                return n.toFixed(2).replace(".", ",");
+              });
             }}
             className="h-11 w-32 text-right text-base"
             aria-label="Desconto"
