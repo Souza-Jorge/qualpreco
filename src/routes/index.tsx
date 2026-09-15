@@ -8,6 +8,7 @@ import {
   History,
   SearchX,
   RotateCcw,
+  Percent,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toNumber, type Produto } from "@/integrations/supabase/client";
@@ -566,7 +567,7 @@ function Index() {
               {homeProms.slice(0, 10).map((p) => {
                 const preco = toNumber(p.sale_price);
                 const promo = toNumber(p.promo_price);
-                const promoAtiva = promo != null && p.promo_end != null && p.promo_end >= todayStr;
+                const promoAtiva = promo != null && p.promo_end != null && p.promo_end >= new Date().toLocaleDateString("en-CA");
                 const fmt = (v: number | null) =>
                   v != null
                     ? v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
