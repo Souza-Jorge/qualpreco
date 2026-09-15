@@ -177,7 +177,7 @@ function Index() {
     const stale = () => reqId !== reqIdRef.current;
     setLoading(true);
     try {
-      const list = await buscarProdutos(q, { onlyPromo: onlyPromoRef.current });
+      const list = await buscarProdutos(q, { onlyPromo: ofertasRef.current });
       if (stale()) return;
       if (list.length === 1) {
         setSelected(list[0]);
@@ -191,7 +191,7 @@ function Index() {
         setResults([]);
         const alvo = isNumeric(q) ? `com o código "${q}"` : `para "${q}"`;
         setError(
-          onlyPromoRef.current
+          ofertasRef.current
             ? `Nenhum produto em oferta encontrado ${alvo}.`
             : `Nenhum produto encontrado ${alvo}.`
         );
@@ -208,16 +208,17 @@ function Index() {
   };
 
   const togglePromo = () => {
-    const next = !onlyPromo;
-    onlyPromoRef.current = next;
-    setOnlyPromo(next);
+    // Alterna o filtro de ofertas via parâmetro de busca na URL.
+    navigate({ to: "/", search: { ofertas: !ofertas } });
+  };
+
+  // Reage à mudança do filtro de ofertas (via URL) re-executando a busca.
+  useEffect(() => {
     const q = query.trim();
-    if (next) {
-      // Ativando: se há query, re-busca com filtro; senão lista todas as ofertas
+    if (ofertas) {
       if (q.length >= 2) runSearch(q);
       else runListarPromocoes();
     } else {
-      // Desativando: se há query, re-busca sem filtro; senão limpa
       if (q.length >= 2) runSearch(q);
       else {
         setResults([]);
@@ -225,7 +226,8 @@ function Index() {
         setError(null);
       }
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ofertas]);
 
   const runListarPromocoes = async () => {
     const reqId = ++reqIdRef.current;
@@ -265,7 +267,7 @@ function Index() {
     setQuery("");
     setSelected(null);
     setError(null);
-    if (onlyPromoRef.current) {
+    if (ofertasRef.current) {
       runListarPromocoes();
     } else {
       setResults([]);
