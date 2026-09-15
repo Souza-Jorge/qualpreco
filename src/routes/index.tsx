@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ScanLine,
@@ -27,6 +27,9 @@ import { BarcodeScanner } from "@/components/BarcodeScanner";
 import logoXapadao from "@/assets/logo-xapadao-header.webp.asset.json";
 
 export const Route = createFileRoute("/")({
+  validateSearch: (input: Record<string, unknown>) => ({
+    ofertas: input.ofertas === true,
+  }),
   head: () => ({
     meta: [
       { title: "Consulta Preços e Gere Orçamentos | QualPreço" },
