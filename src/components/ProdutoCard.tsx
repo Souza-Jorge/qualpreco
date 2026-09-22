@@ -125,8 +125,9 @@ export function ProdutoCard({ produto }: { produto: Produto }) {
         <div className="rounded-lg bg-accent p-4">
           {promoAtiva && (
             <Badge className="mb-2 bg-destructive text-destructive-foreground hover:bg-destructive">
-              PROMOÇÃO
-              {produto.promo_end && ` até ${fmtDate(produto.promo_end)}`}
+              {produto.promo_start && produto.promo_start === produto.promo_end
+                ? `OFERTA DIA ${fmtDate(produto.promo_end)}`
+                : `PROMOÇÃO${produto.promo_end ? ` até ${fmtDate(produto.promo_end)}` : ""}`}
             </Badge>
           )}
           <div className="flex flex-wrap items-baseline gap-3">

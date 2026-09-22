@@ -462,7 +462,9 @@ function Index() {
                       )}
                       {promoAtiva && (
                         <span className="shrink-0 text-sm font-medium text-destructive">
-                          até {fmtDateList(p.promo_end)}
+                          {p.promo_start && p.promo_start === p.promo_end
+                            ? `Oferta Dia ${fmtDateList(p.promo_end)}`
+                            : `até ${fmtDateList(p.promo_end)}`}
                         </span>
                       )}
                     </div>
