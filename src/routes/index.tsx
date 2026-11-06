@@ -459,7 +459,7 @@ function Index() {
                     {promoAtiva && (
                       <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
                         <span className="shrink-0 rounded bg-destructive px-1.5 py-0.5 text-[10px] font-bold leading-none text-destructive-foreground">
-                          PROMO
+                          OFERTA
                         </span>
                         <span className="text-sm font-medium text-destructive">
                           {p.promo_start && p.promo_start === p.promo_end
